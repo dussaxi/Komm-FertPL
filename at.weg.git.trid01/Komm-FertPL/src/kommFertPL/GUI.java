@@ -6,11 +6,18 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
+import java.awt.GridLayout;
 import java.awt.Insets;
 
+import javax.swing.BoxLayout;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
@@ -53,24 +60,24 @@ public class GUI extends JFrame {
 
 	private JPanel contentPane;
 	private JTextField txtFertigungsauftrag;
-	private JLabel lblNewLabel;
+	private JLabel lblFertigungsauftrag;
 	private JTextField txtAnzahl;
-	private JLabel lblNewLabel_1;
+	private JLabel lblAnzahl;
 	private JTextField txtAnlage;
-	private JLabel lblNewLabel_2;
+	private JLabel lblAnlage;
 	private JFormattedTextField txtDatum;
-	private JLabel lblNewLabel_3;
+	private JLabel lblDatum;
 	private JFormattedTextField txtZeitAnlieferung;
-	private JLabel lblNewLabel_4;
+	private JLabel lblZeitAnlieferung;
 	private JTextField txtNameMA;
-	private JLabel lblNewLabel_5;
+	private JLabel lblNameMA;
 	private JButton btnDatenSpeichern;
 	private final Action action = new SwingAction();
 	
 	private Connection con = null;
 	private Statement stmt = null;
 	private ResultSet rs = null;
-	private JLabel lblNewLabel_6;
+	
 		
 	/**
 	 * Launch the application.
@@ -94,158 +101,162 @@ public class GUI extends JFrame {
 	public GUI() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 500, 254);
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
-		GridBagLayout gbl_contentPane = new GridBagLayout();
-		gbl_contentPane.columnWidths = new int[]{474, 0};
-		gbl_contentPane.rowHeights = new int[]{10, 190, 0};
-		gbl_contentPane.columnWeights = new double[]{0.0, Double.MIN_VALUE};
-		gbl_contentPane.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
-		contentPane.setLayout(gbl_contentPane);
-		
+		Container contentPane = getContentPane();
 		JPanel panel = new JPanel();
-		GridBagConstraints gbc_panel = new GridBagConstraints();
-		gbc_panel.anchor = GridBagConstraints.NORTH;
-		gbc_panel.fill = GridBagConstraints.HORIZONTAL;
-		gbc_panel.insets = new Insets(0, 0, 5, 0);
-		gbc_panel.gridx = 0;
-		gbc_panel.gridy = 0;
-		contentPane.add(panel, gbc_panel);
+		panel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 		
-		JPanel panel_1 = new JPanel();
-		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
-		gbc_panel_1.fill = GridBagConstraints.BOTH;
-		gbc_panel_1.gridx = 0;
-		gbc_panel_1.gridy = 1;
-		contentPane.add(panel_1, gbc_panel_1);
-		GridBagLayout gbl_panel_1 = new GridBagLayout();
-		gbl_panel_1.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
-		gbl_panel_1.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
-		gbl_panel_1.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE};
-		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-		panel_1.setLayout(gbl_panel_1);
+//		setContentPane(contentPane);
+//		GridBagLayout gbl_contentPane = new GridBagLayout();
+//		gbl_contentPane.columnWidths = new int[]{474, 0};
+//		gbl_contentPane.rowHeights = new int[]{10, 190, 0};
+//		gbl_contentPane.columnWeights = new double[]{0.0, Double.MIN_VALUE};
+//		gbl_contentPane.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+//		contentPane.setLayout(gbl_contentPane);
 		
-		lblNewLabel = new JLabel("Fertigungsauftrag");
-		lblNewLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
-		gbc_lblNewLabel.gridwidth = 2;
-		gbc_lblNewLabel.fill = GridBagConstraints.VERTICAL;
-		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel.gridx = 3;
-		gbc_lblNewLabel.gridy = 0;
-		panel_1.add(lblNewLabel, gbc_lblNewLabel);
+		JPanel panelInput = new JPanel(new GridBagLayout());
+				
+//		GridBagConstraints gbc_panelInput = new GridBagConstraints();
+//		gbc_panelInput.anchor = GridBagConstraints.PAGE_START;
+//		gbc_panelInput.fill = GridBagConstraints.HORIZONTAL;
+//		gbc_panelInput.insets = new Insets(0, 0, 5, 0);  // top, left, bottom, right
+//		gbc_panelInput.gridx = 0;
+//		gbc_panel.gridy = 0;
+//		contentPane.setLayout(new GridBagLayout());
+		
+//		JPanel panel_1 = new JPanel();
+//		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
+//		gbc_panel_1.fill = GridBagConstraints.BOTH;
+//		gbc_panel_1.gridx = 0;
+//		gbc_panel_1.gridy = 1;
+//		contentPane.add(panel_1, gbc_panel_1);
+//		GridBagLayout gbl_panel_1 = new GridBagLayout();
+//		gbl_panel_1.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
+//		gbl_panel_1.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
+//		gbl_panel_1.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE};
+//		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+//		panel_1.setLayout(gbl_panel_1);
+		
+		lblFertigungsauftrag = new JLabel("Fertigungsauftrag"); 
+		GridBagConstraints gbc_lblFertigungsauftrag = new GridBagConstraints();
+		gbc_lblFertigungsauftrag.gridwidth = 1;
+		gbc_lblFertigungsauftrag.insets = new Insets(0, 0, 5, 5);
+		gbc_lblFertigungsauftrag.anchor = GridBagConstraints.EAST;
+		gbc_lblFertigungsauftrag.gridx = 0;
+		gbc_lblFertigungsauftrag.gridy = 0;
+		panelInput.add(lblFertigungsauftrag, gbc_lblFertigungsauftrag);
 		
 		txtFertigungsauftrag = new JTextField();
 		txtFertigungsauftrag.setText("1234567");
 		GridBagConstraints gbc_txtFertigungsauftrag = new GridBagConstraints();
+		gbc_txtFertigungsauftrag.gridwidth = 1;
 		gbc_txtFertigungsauftrag.insets = new Insets(0, 0, 5, 5);
-		gbc_txtFertigungsauftrag.gridwidth = 2;
-		gbc_txtFertigungsauftrag.fill = GridBagConstraints.HORIZONTAL;
-		gbc_txtFertigungsauftrag.gridx = 5;
+		gbc_txtFertigungsauftrag.anchor = GridBagConstraints.WEST;
+		gbc_txtFertigungsauftrag.gridx = 1;
 		gbc_txtFertigungsauftrag.gridy = 0;
-		panel_1.add(txtFertigungsauftrag, gbc_txtFertigungsauftrag);
+		panelInput.add(txtFertigungsauftrag, gbc_txtFertigungsauftrag);
 		
-		lblNewLabel_1 = new JLabel("Anzahl");
-		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
-		gbc_lblNewLabel_1.gridwidth = 2;
-		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_1.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_1.gridx = 3;
-		gbc_lblNewLabel_1.gridy = 1;
-		panel_1.add(lblNewLabel_1, gbc_lblNewLabel_1);
+		lblAnzahl = new JLabel("Anzahl");
+		GridBagConstraints gbc_lblAnzahl = new GridBagConstraints();
+		gbc_lblAnzahl.gridwidth = 1;
+		gbc_lblAnzahl.insets = new Insets(0, 0, 5, 5);
+		gbc_lblAnzahl.anchor = GridBagConstraints.EAST;
+		gbc_lblAnzahl.gridx = 1;
+		gbc_lblAnzahl.gridy = 0;
+		panelInput.add(lblAnzahl, gbc_lblAnzahl);
 		
 		txtAnzahl = new JTextField();
 		txtAnzahl.setText("10");
 		GridBagConstraints gbc_txtAnzahl = new GridBagConstraints();
-		gbc_txtAnzahl.gridwidth = 2;
+		gbc_txtAnzahl.gridwidth = 1;
 		gbc_txtAnzahl.insets = new Insets(0, 0, 5, 5);
-		gbc_txtAnzahl.fill = GridBagConstraints.HORIZONTAL;
-		gbc_txtAnzahl.gridx = 5;
+		gbc_txtAnzahl.anchor = GridBagConstraints.WEST;
+		gbc_txtAnzahl.gridx = 1;
 		gbc_txtAnzahl.gridy = 1;
-		panel_1.add(txtAnzahl, gbc_txtAnzahl);
+		panelInput.add(txtAnzahl, gbc_txtAnzahl);
 		txtAnzahl.setColumns(10);
 		
-		lblNewLabel_2 = new JLabel("Anlage");
-		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
-		gbc_lblNewLabel_2.gridwidth = 2;
-		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_2.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_2.gridx = 3;
-		gbc_lblNewLabel_2.gridy = 2;
-		panel_1.add(lblNewLabel_2, gbc_lblNewLabel_2);
+		lblAnlage = new JLabel("Anlage");
+		GridBagConstraints gbc_lblAnlage = new GridBagConstraints();
+		gbc_lblAnlage.gridwidth = 1;
+		gbc_lblAnlage.insets = new Insets(0, 0, 5, 5);
+		gbc_lblAnlage.anchor = GridBagConstraints.EAST;
+		gbc_lblAnlage.gridx = 2;
+		gbc_lblAnlage.gridy = 0;
+		panelInput.add(lblAnlage, gbc_lblAnlage);
 		
 		txtAnlage = new JTextField();
 		txtAnlage.setText("TEST1A");
 		GridBagConstraints gbc_txtAnlage = new GridBagConstraints();
-		gbc_txtAnlage.gridwidth = 2;
+		gbc_txtAnlage.gridwidth = 1;
 		gbc_txtAnlage.insets = new Insets(0, 0, 5, 5);
-		gbc_txtAnlage.fill = GridBagConstraints.HORIZONTAL;
-		gbc_txtAnlage.gridx = 5;
-		gbc_txtAnlage.gridy = 2;
-		panel_1.add(txtAnlage, gbc_txtAnlage);
+		gbc_txtAnlage.anchor = GridBagConstraints.WEST;
+		gbc_txtAnlage.gridx = 2;
+		gbc_txtAnlage.gridy = 1;
+		panelInput.add(txtAnlage, gbc_txtAnlage);
 		txtAnlage.setColumns(10);
 		
-		lblNewLabel_3 = new JLabel("Datum");
-		GridBagConstraints gbc_lblNewLabel_3 = new GridBagConstraints();
-		gbc_lblNewLabel_3.gridwidth = 2;
-		gbc_lblNewLabel_3.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_3.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_3.gridx = 3;
-		gbc_lblNewLabel_3.gridy = 3;
-		panel_1.add(lblNewLabel_3, gbc_lblNewLabel_3);
+		lblDatum = new JLabel("Datum");
+		GridBagConstraints gbc_lblDatum = new GridBagConstraints();
+		gbc_lblDatum.gridwidth = 1;
+		gbc_lblDatum.insets = new Insets(0, 0, 5, 5);
+		gbc_lblDatum.anchor = GridBagConstraints.EAST;
+		gbc_lblDatum.gridx = 3;
+		gbc_lblDatum.gridy = 0;
+		panelInput.add(lblDatum, gbc_lblDatum);
 		
 		txtDatum = new JFormattedTextField(new SimpleDateFormat("d.M.yyyy"));
 		txtDatum.setValue(new Date());
 		GridBagConstraints gbc_txtDatum = new GridBagConstraints();
-		gbc_txtDatum.gridwidth = 2;
+		gbc_txtDatum.gridwidth = 1;
 		gbc_txtDatum.insets = new Insets(0, 0, 5, 5);
-		gbc_txtDatum.fill = GridBagConstraints.HORIZONTAL;
-		gbc_txtDatum.gridx = 5;
-		gbc_txtDatum.gridy = 3;
-		panel_1.add(txtDatum, gbc_txtDatum);
+		gbc_txtDatum.anchor = GridBagConstraints.WEST;
+		gbc_txtDatum.gridx = 3;
+		gbc_txtDatum.gridy = 1;
+		panelInput.add(txtDatum, gbc_txtDatum);
 		txtDatum.setColumns(10);
 		
-		lblNewLabel_4 = new JLabel("Zeit der Anlieferung");
-		GridBagConstraints gbc_lblNewLabel_4 = new GridBagConstraints();
-		gbc_lblNewLabel_4.gridwidth = 2;
-		gbc_lblNewLabel_4.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_4.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_4.gridx = 3;
-		gbc_lblNewLabel_4.gridy = 4;
-		panel_1.add(lblNewLabel_4, gbc_lblNewLabel_4);
+		lblZeitAnlieferung = new JLabel("Zeit der Anlieferung");
+		GridBagConstraints gbc_lblZeitAnlieferung = new GridBagConstraints();
+		gbc_lblZeitAnlieferung.gridwidth = 1;
+		gbc_lblZeitAnlieferung.insets = new Insets(0, 0, 5, 5);
+		gbc_lblZeitAnlieferung.anchor = GridBagConstraints.EAST;
+		gbc_lblZeitAnlieferung.gridx = 4;
+		gbc_lblZeitAnlieferung.gridy = 0;
+		panelInput.add(lblZeitAnlieferung, gbc_lblZeitAnlieferung);
 		
 		txtZeitAnlieferung = new JFormattedTextField(new SimpleDateFormat("H:mm"));
 		txtZeitAnlieferung.setValue(new Date());
 		GridBagConstraints gbc_txtZeitAnlieferung = new GridBagConstraints();
-		gbc_txtZeitAnlieferung.gridwidth = 2;
+		gbc_txtZeitAnlieferung.gridwidth = 1;
 		gbc_txtZeitAnlieferung.insets = new Insets(0, 0, 5, 5);
-		gbc_txtZeitAnlieferung.fill = GridBagConstraints.HORIZONTAL;
-		gbc_txtZeitAnlieferung.gridx = 5;
-		gbc_txtZeitAnlieferung.gridy = 4;
-		panel_1.add(txtZeitAnlieferung, gbc_txtZeitAnlieferung);
+		gbc_txtZeitAnlieferung.anchor = GridBagConstraints.WEST;
+		gbc_txtZeitAnlieferung.gridx = 4;
+		gbc_txtZeitAnlieferung.gridy = 1;
+		panelInput.add(txtZeitAnlieferung, gbc_txtZeitAnlieferung);
 		txtZeitAnlieferung.setColumns(10);
 		
-		lblNewLabel_5 = new JLabel("Name MA");
-		GridBagConstraints gbc_lblNewLabel_5 = new GridBagConstraints();
-		gbc_lblNewLabel_5.gridwidth = 2;
-		gbc_lblNewLabel_5.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_5.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_5.gridx = 3;
-		gbc_lblNewLabel_5.gridy = 5;
-		panel_1.add(lblNewLabel_5, gbc_lblNewLabel_5);
+		lblNameMA = new JLabel("Name MA");
+		GridBagConstraints gbc_lblNameMA = new GridBagConstraints();
+		gbc_lblNameMA.gridwidth = 1;
+		gbc_lblNameMA.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNameMA.anchor = GridBagConstraints.EAST;
+		gbc_lblNameMA.gridx = 5;
+		gbc_lblNameMA.gridy = 0;
+		panelInput.add(lblNameMA, gbc_lblNameMA);
 		
 		txtNameMA = new JTextField();
 		txtNameMA.setText("Matthias Weg");
 		GridBagConstraints gbc_txtNameMA = new GridBagConstraints();
-		gbc_txtNameMA.gridwidth = 2;
+		gbc_txtNameMA.gridwidth = 1;
 		gbc_txtNameMA.insets = new Insets(0, 0, 5, 5);
-		gbc_txtNameMA.fill = GridBagConstraints.HORIZONTAL;
+		gbc_txtNameMA.anchor = GridBagConstraints.WEST;
 		gbc_txtNameMA.gridx = 5;
-		gbc_txtNameMA.gridy = 5;
-		panel_1.add(txtNameMA, gbc_txtNameMA);
+		gbc_txtNameMA.gridy = 1;
+		panelInput.add(txtNameMA, gbc_txtNameMA);
 		txtNameMA.setColumns(10);
+		
+		JPanel panelButtons = new JPanel(new FlowLayout());
 		
 		btnDatenSpeichern = new JButton("Daten Speichern");
 		btnDatenSpeichern.addActionListener(new ActionListener() {
@@ -253,21 +264,23 @@ public class GUI extends JFrame {
 			}
 		});
 		btnDatenSpeichern.setAction(action);
-		GridBagConstraints gbc_btnDatenSpeichern = new GridBagConstraints();
-		gbc_btnDatenSpeichern.insets = new Insets(0, 0, 5, 5);
-		gbc_btnDatenSpeichern.gridx = 5;
-		gbc_btnDatenSpeichern.gridy = 6;
-		panel_1.add(btnDatenSpeichern, gbc_btnDatenSpeichern);
+		panelButtons.add(btnDatenSpeichern);
 		
-		lblNewLabel_6 = new JLabel("Vers. 1.0 \u00A9 Matthias Weg, 5.8.2014");
-		lblNewLabel_6.setFont(new Font("Tahoma", Font.PLAIN, 10));
-		lblNewLabel_6.setHorizontalAlignment(SwingConstants.CENTER);
-		GridBagConstraints gbc_lblNewLabel_6 = new GridBagConstraints();
-		gbc_lblNewLabel_6.anchor = GridBagConstraints.EAST;
-		gbc_lblNewLabel_6.gridwidth = 3;
-		gbc_lblNewLabel_6.gridx = 5;
-		gbc_lblNewLabel_6.gridy = 7;
-		panel_1.add(lblNewLabel_6, gbc_lblNewLabel_6);
+		JPanel panelTable = new JPanel(new BorderLayout());
+		
+		String[] columnNames = {"Fertigungsauftrag", "Anzahl Geräte", "Anlage", "Datum der Anlieferung", "Zeit der Anlieferung", "Name des Mitarbeiters"};
+		Object[][] data = {{"1234567", 10, "TEST1A", "25.7.2014", "11:11", "Matthias Weg"}}; 
+		JTable table = new JTable(data, columnNames);
+		JScrollPane spTable = new JScrollPane(table);
+		table.setFillsViewportHeight(true);
+		
+		JPanel panelCopyright = new JPanel(new FlowLayout());
+		
+		JLabel lblcopyright = new JLabel("Vers. 1.1 \u00A9 Matthias Weg, 5.8.2014");
+		lblcopyright.setFont(new Font("Tahoma", Font.PLAIN, 10));
+		lblcopyright.setHorizontalAlignment(SwingConstants.EAST);
+		panelCopyright.add(lblcopyright);
+		
 	}
 
 	private class SwingAction extends AbstractAction {
