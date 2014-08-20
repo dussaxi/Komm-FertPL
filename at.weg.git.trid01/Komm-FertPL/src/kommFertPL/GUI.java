@@ -82,6 +82,7 @@ public class GUI extends JFrame implements RowSetListener {
 	private JLabel lblNameMA;
 	private JButton btnDatenSpeichern;
 	private final Action action = new SwingAction();
+	private JButton btnDatenLoeschen;
 	
 	private Connection con = null;
 	private Statement stmt = null;
@@ -89,6 +90,8 @@ public class GUI extends JFrame implements RowSetListener {
 	
 	QueryTableModel myQueryTableModel;
 	JTable table;
+	CachedRowSet myCachedRowSet;
+	
 	
 		
 	/**
@@ -133,40 +136,10 @@ public class GUI extends JFrame implements RowSetListener {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 500, 254);
 		Container contentPane = getContentPane();
-		//contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
-		
-//		setContentPane(contentPane);
-//		GridBagLayout gbl_contentPane = new GridBagLayout();
-//		gbl_contentPane.columnWidths = new int[]{474, 0};
-//		gbl_contentPane.rowHeights = new int[]{10, 190, 0};
-//		gbl_contentPane.columnWeights = new double[]{0.0, Double.MIN_VALUE};
-//		gbl_contentPane.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
-//		contentPane.setLayout(gbl_contentPane);
 		
 		JPanel panelInput = new JPanel(new GridBagLayout());
 				
-//		GridBagConstraints gbc_panelInput = new GridBagConstraints();
-//		gbc_panelInput.anchor = GridBagConstraints.PAGE_START;
-//		gbc_panelInput.fill = GridBagConstraints.HORIZONTAL;
-//		gbc_panelInput.insets = new Insets(0, 0, 5, 0);  // top, left, bottom, right
-//		gbc_panelInput.gridx = 0;
-//		gbc_panel.gridy = 0;
-//		contentPane.setLayout(new GridBagLayout());
-		
-//		JPanel panel_1 = new JPanel();
-//		GridBagConstraints gbc_panel_1 = new GridBagConstraints();
-//		gbc_panel_1.fill = GridBagConstraints.BOTH;
-//		gbc_panel_1.gridx = 0;
-//		gbc_panel_1.gridy = 1;
-//		contentPane.add(panel_1, gbc_panel_1);
-//		GridBagLayout gbl_panel_1 = new GridBagLayout();
-//		gbl_panel_1.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
-//		gbl_panel_1.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
-//		gbl_panel_1.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, Double.MIN_VALUE};
-//		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-//		panel_1.setLayout(gbl_panel_1);
-		
 		lblFertigungsauftrag = new JLabel("Fertigungsauftrag"); 
 		GridBagConstraints gbc_lblFertigungsauftrag = new GridBagConstraints();
 		gbc_lblFertigungsauftrag.gridwidth = 1;
@@ -310,17 +283,35 @@ public class GUI extends JFrame implements RowSetListener {
 					// writeToFile();
 				    saveToDB();
 					System.out.println("Done");
-					table.setModel(myQueryTableModel);
+					if (myQueryTableModel != null) {
+						try {
+							myQueryTableModel.fireTableDataChanged();
+							updateMyQueryTable();
+						} catch (SQLException e1) {
+							printSQLException(e1);
+						}	    
+					}
 				}
 			}
 		});
 		btnDatenSpeichern.setAction(action);
 		panelButtons.add(btnDatenSpeichern);
 		
+		btnDatenLoeschen = new JButton("Markierte Daten löschen");
+		btnDatenLoeschen.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO: Delete Data from DB
+				
+				
+			}
+		});
+		btnDatenSpeichern.setAction(action);
+		panelButtons.add(btnDatenSpeichern);
+		
+		
 		JPanel panelTable = new JPanel(new BorderLayout());
 		
-	    CachedRowSet myCachedRowSet;
-		try {
+	    try {
 			myCachedRowSet = getContentsOfQueryTable();
 			myQueryTableModel = new QueryTableModel(myCachedRowSet);
 		    myQueryTableModel.addEventHandlersToRowSet(this);
@@ -348,6 +339,13 @@ public class GUI extends JFrame implements RowSetListener {
 		contentPane.add(panelCopyright);
 	}
 	
+	public void updateMyQueryTable() throws SQLException {
+		myCachedRowSet = getContentsOfQueryTable();
+		myQueryTableModel = new QueryTableModel(myCachedRowSet);
+		myQueryTableModel.addEventHandlersToRowSet(this);
+		table.setModel(myQueryTableModel);
+	}
+
 	// From http://docs.oracle.com/javase/tutorial/uiswing/components/table.html#data
 	// and http://www.java2s.com/Code/Java/Swing-JFC/DisplayResultSetinTableJTable.htm
     class QueryTableModel extends AbstractTableModel {
@@ -355,7 +353,7 @@ public class GUI extends JFrame implements RowSetListener {
     	ResultSetMetaData metadata; // Additional information about the results
     	int numcols, numrows; // How many rows and columns in the table
  
-    	public CachedRowSet getCoffeesRowSet() {
+    	public CachedRowSet getRowSet() {
     		return myRowSet;
     	}
     	
@@ -688,7 +686,7 @@ public class GUI extends JFrame implements RowSetListener {
 		CachedRowSet currentRowSet = this.myQueryTableModel.myRowSet;
 		try {
 			currentRowSet.moveToCurrentRow();
-			myQueryTableModel = new QueryTableModel(myQueryTableModel.getCoffeesRowSet());
+			myQueryTableModel = new QueryTableModel(myQueryTableModel.getRowSet());
 			table.setModel(myQueryTableModel);
 		} catch (SQLException ex) {
 			printSQLException(ex);
