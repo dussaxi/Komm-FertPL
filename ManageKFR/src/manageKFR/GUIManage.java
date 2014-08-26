@@ -7,32 +7,44 @@ import javax.sql.RowSetListener;
 import javax.sql.rowset.CachedRowSet;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
 import java.awt.Insets;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
 import javax.swing.AbstractAction;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.NumberFormat;
@@ -58,7 +70,7 @@ import java.util.Vector;
 import java.text.SimpleDateFormat;
 import java.awt.Font;
 
-public class GUIManage extends JFrame {
+public class GUIManage extends JFrame implements RowSetListener {
 	
 	/**
 	 * 
@@ -67,7 +79,7 @@ public class GUIManage extends JFrame {
 	public String fertigungsauftrag;
 	
 	private JPanel contentPane;
-	private JTextField txtFertigungsauftrag;
+	private FocusTextField txtFertigungsauftrag;
 	private JLabel lblFertigungsauftrag;
 	private JButton btnSuchen;
 //	private final Action action = new SwingAction();
@@ -75,11 +87,14 @@ public class GUIManage extends JFrame {
 	private JButton btnMNoffen;
 	private JList list;
 	private DefaultListModel listModel;
+	private JLabel lblAnzahl;
 	
 	private Connection con = null;
 	private Statement stmt = null;
 	private ResultSet rs = null;
 	
+	QueryTableModel myQueryTableModel;
+	JTable table;
 	CachedRowSet myCachedRowSet;
 	
 	
@@ -138,8 +153,10 @@ public class GUIManage extends JFrame {
 		gbc_lblFertigungsauftrag.gridy = 0;
 		panelInput.add(lblFertigungsauftrag, gbc_lblFertigungsauftrag);
 		
-		txtFertigungsauftrag = new JTextField();
+		txtFertigungsauftrag = new FocusTextField();
 		txtFertigungsauftrag.setText("1234567");
+		txtFertigungsauftrag.setPreferredSize(new Dimension(100,20));
+		txtFertigungsauftrag.setHorizontalAlignment(JTextField.CENTER);
 		GridBagConstraints gbc_txtFertigungsauftrag = new GridBagConstraints();
 		gbc_txtFertigungsauftrag.gridwidth = 1;
 		gbc_txtFertigungsauftrag.insets = new Insets(5, 5, 5, 5);
@@ -155,25 +172,80 @@ public class GUIManage extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				fertigungsauftrag = txtFertigungsauftrag.getText();
 				if (checkConditions()) {
-					// Data is OK, now search for all serial numbers to this FAUF 
-				    searchSerialNumbers();
-//					System.out.println("Done");
+					// Data is OK, show the data in the table;
+				    if (myQueryTableModel != null) {
+						try {
+							myQueryTableModel.fireTableDataChanged();
+							updateMyQueryTable();
+						} catch (SQLException e1) {
+							printSQLException(e1);
+						}	    
+					}
+					
 					
 				}
 			}
 		});
 		panelSuchen.add(btnSuchen);
 		
-		JPanel panelMassnahmen = new JPanel(new BorderLayout());
+//		JPanel panelMassnahmen = new JPanel(new BorderLayout());
+//		
+//		listModel = new DefaultListModel();
+//		list = new JList(listModel);
+//		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+//		list.setSelectedIndex(0);
+//		list.setLayoutOrientation(JList.VERTICAL);
+//		list.setVisibleRowCount(10);
+//	    JScrollPane spList = new JScrollPane(list);
+//		panelMassnahmen.add(spList, BorderLayout.CENTER);
 		
-		listModel = new DefaultListModel();
-		list = new JList(listModel);
-		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		list.setSelectedIndex(0);
-		list.setLayoutOrientation(JList.VERTICAL);
-		list.setVisibleRowCount(10);
-	    JScrollPane spList = new JScrollPane(list);
-		panelMassnahmen.add(spList, BorderLayout.CENTER);
+		JPanel panelTable = new JPanel(new BorderLayout());
+		
+	    try {
+			myCachedRowSet = getContentsOfQueryTable();
+			myQueryTableModel = new QueryTableModel(myCachedRowSet);
+		    myQueryTableModel.addEventHandlersToRowSet(this);
+		} catch (SQLException e1) {
+			printSQLException(e1);
+		}	    
+
+	    table = new JTable(); // Displays the table
+	    TableColumnModel tcm = table.getColumnModel();
+	    table.setModel(myQueryTableModel);
+	    table.addMouseListener(new MouseAdapter() {
+	    	public void mouseClicked(final MouseEvent e) {
+	    		//Einfachklick auf einen Tabelleneintrag
+				if (e.getClickCount() == 1) {
+					String rowsCount = String.valueOf(table.getSelectedRows().length);
+					lblAnzahl.setText(rowsCount);
+				}
+				//Doppelklick auf einen Tabelleneintrag
+				if (e.getClickCount() == 2) {
+					// So far do nothing.
+				}
+	    	}
+	    });
+	    try {
+			updateMyQueryTable();
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	    
+
+		
+	    JScrollPane spTable = new JScrollPane(table);
+	    spTable.setPreferredSize(new Dimension(800, 400));
+	    spTable.setMinimumSize(new Dimension(800, 400));
+//	    spTable.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+//	    spTable.setHorizontalScrollBar(new JScrollBar());
+	    
+		table.setFillsViewportHeight(true);
+		panelTable.add(spTable, BorderLayout.CENTER);
+		// Zeigt die Anzahl der selektierten Zeilen
+		lblAnzahl = new JLabel("0");
+		lblAnzahl.setBorder(new EmptyBorder(0,10,0,0));
+		panelTable.add(lblAnzahl, BorderLayout.PAGE_END);
 		
 		JPanel panelButton = new JPanel(new FlowLayout());
 		
@@ -194,19 +266,187 @@ public class GUIManage extends JFrame {
 		
 		JPanel panelCopyright = new JPanel(new FlowLayout());
 		
-		JLabel lblcopyright = new JLabel("Vers. 1.0 \u00A9 Matthias Weg, 22.8.2014");
+		JLabel lblcopyright = new JLabel("Vers. 1.1 \u00A9 Matthias Weg, 26.8.2014");
 		lblcopyright.setFont(new Font("Tahoma", Font.PLAIN, 10));
 		//lblcopyright.setHorizontalAlignment(SwingConstants.EAST);
 		panelCopyright.add(lblcopyright);
 		
 		contentPane.add(panelInput);
 		contentPane.add(panelSuchen);
-		contentPane.add(panelMassnahmen);
+//		contentPane.add(panelMassnahmen);
+		contentPane.add(panelTable);
 		contentPane.add(panelButton);
 		contentPane.add(panelCopyright);
+		contentPane.setPreferredSize(new Dimension(1000, 570));
 	}
 	
+	static class FocusTextField extends JTextField {
+	    {
+	        addFocusListener(new FocusListener() {
+
+	            @Override
+	            public void focusGained(FocusEvent e) {
+	                FocusTextField.this.select(0, getText().length());
+	            }
+
+	            @Override
+	            public void focusLost(FocusEvent e) {
+	                FocusTextField.this.select(0, 0);
+	            }
+	        });
+	    }
+	}
 	
+	public void updateMyQueryTable() throws SQLException {
+		myCachedRowSet = getContentsOfQueryTable();
+		myQueryTableModel = new QueryTableModel(myCachedRowSet);
+		myQueryTableModel.addEventHandlersToRowSet(this);
+		table.setModel(myQueryTableModel);
+		TableColumnModel tcm = table.getColumnModel();
+	    tcm.getColumn(0).setPreferredWidth(100);		// Chargennummer
+	    tcm.getColumn(0).setMinWidth(100);
+	    tcm.getColumn(0).setMaxWidth(100);
+	    tcm.getColumn(1).setPreferredWidth(67);			// Maﬂnahmenstatus
+	    tcm.getColumn(1).setMinWidth(67);
+	    tcm.getColumn(1).setMaxWidth(67);
+	    tcm.getColumn(2).setPreferredWidth(60);			// Schrott?
+	    tcm.getColumn(2).setMinWidth(60);
+	    tcm.getColumn(2).setMaxWidth(60);
+	    tcm.getColumn(3).setPreferredWidth(107);		// Ausfallparameter
+	    tcm.getColumn(3).setMinWidth(107);
+	    tcm.getColumn(3).setMaxWidth(107);
+	    tcm.getColumn(4).setPreferredWidth(100);		// Artikelnummer ROH
+	    tcm.getColumn(4).setMinWidth(100);
+	    tcm.getColumn(4).setMaxWidth(100);
+	    tcm.getColumn(5).setPreferredWidth(200);		// Artikelbezeichnung ROH			
+	    tcm.getColumn(5).setMinWidth(200);
+	    tcm.getColumn(6).setPreferredWidth(66);			// Einbauplatz
+	    tcm.getColumn(6).setMinWidth(65);
+	    tcm.getColumn(6).setMaxWidth(65);
+	    tcm.getColumn(7).setPreferredWidth(100);		// Artikelnummer FERT
+	    tcm.getColumn(7).setMinWidth(100);
+	    tcm.getColumn(7).setMaxWidth(100);
+	    tcm.getColumn(8).setPreferredWidth(200);		// Artikelbezeichnung FERT
+	    tcm.getColumn(8).setMinWidth(200);
+	}
+
+	// From http://docs.oracle.com/javase/tutorial/uiswing/components/table.html#data
+	// and http://www.java2s.com/Code/Java/Swing-JFC/DisplayResultSetinTableJTable.htm
+    class QueryTableModel extends AbstractTableModel {
+    	String[] columnNames = {"Seriennummer", "MN Status", "Schrott?", "Ausfallparameter", "ROH Art.Nr.", "ROH Art.Bez.", "Einbaupl.", "FERT Art.Nr.", "FERT Art.Bez."}; 
+    	CachedRowSet myRowSet; // The ResultSet to interpret
+    	ResultSetMetaData metadata; // Additional information about the results
+    	int numcols, numrows; // How many rows and columns in the table
+ 
+    	public CachedRowSet getRowSet() {
+    		return myRowSet;
+    	}
+    	
+        public QueryTableModel(CachedRowSet rowSetArg) throws SQLException {
+        	this.myRowSet = rowSetArg;
+            this.metadata = this.myRowSet.getMetaData();
+            numcols = metadata.getColumnCount();
+
+            // Retrieve the number of rows.
+            this.myRowSet.beforeFirst();
+            this.numrows = 0;
+            while (this.myRowSet.next()) {
+              this.numrows++;
+            }
+            this.myRowSet.beforeFirst();
+            
+        }
+        
+        public TableColumn getColumn(int i) {
+			return this.getColumn(i);
+		}
+
+		public void addEventHandlersToRowSet(RowSetListener listener) {
+        	this.myRowSet.addRowSetListener(listener);
+        }
+        
+        public void close() {
+        	try {
+        		myRowSet.getStatement().close();
+        	} catch (SQLException e) {
+        		printSQLException(e);
+        	}
+        }
+
+        /** Automatically close when we're garbage collected */
+        protected void finalize() {
+        	close();
+        }
+
+        public int getColumnCount() {
+            return numcols;
+        }
+ 
+        public int getRowCount() {
+            return numrows;
+        }
+ 
+        public String getColumnName(int col) {
+//        	try {
+//        		return this.metadata.getColumnLabel(col + 1);
+//        	} catch (SQLException e) {
+//        		return e.toString();
+//        	}
+        	return columnNames[col];
+        }
+ 
+        public Object getValueAt(int row, int col) {
+        	try {
+        		this.myRowSet.absolute(row + 1);
+        		Object o = this.myRowSet.getObject(col + 1);
+        		if (o == null)
+        			return null;
+        		else
+        			return o.toString();
+        	} catch (SQLException e) {
+        		return e.toString();
+        	}
+        }
+ 
+        /*
+         * JTable uses this method to determine the default renderer/
+         * editor for each cell.  If we didn't implement this method,
+         * then the last column would contain text ("true"/"false"),
+         * rather than a check box.
+         */
+        public Class getColumnClass(int c) {
+            return String.class;
+        }
+ 
+        /*
+         * Don't need to implement this method unless your table's
+         * editable.
+         */
+        public boolean isCellEditable(int row, int col) {
+            //Note that the data/cell address is constant,
+            //no matter where the cell appears onscreen.
+//            if (col < 2) {
+//                return false;
+//            } else {
+//                return true;
+//            }
+        	return false;
+        }
+ 
+        /*
+         * Don't need to implement this method unless your table's
+         * data can change.
+         */
+        public void setValueAt(Object value, int row, int col) {
+        	System.out.println("Calling setValueAt row " + row + ", column " + col);
+        }
+ 
+        public void addTableModelListener(TableModelListener l) {
+        }
+
+        public void removeTableModelListener(TableModelListener l) {
+        }
+    }
     
 	public CachedRowSet getContentsOfQueryTable() throws SQLException {
         CachedRowSet crs = null;
@@ -217,7 +457,25 @@ public class GUIManage extends JFrame {
         	crs.setUsername("QSYSTEST");
         	crs.setPassword("qsys");
         	crs.setUrl("jdbc:oracle:thin:@atdotrsr26:1521/UNITEST");
-        	crs.setCommand("select * from tri_pl_geraete order by id desc");
+        	crs.setCommand("select charge.schargennr as ChargenNr, " +
+					"case when rqms_mass.nlfdmasnr is null then \'null\' else case when rqms_mass.dterledigtam is null then \'offen\' else \'abgeschl.\' end end as MN, " +
+					"case when pri_kfr_repair.nscrap = 1 then \'Schrott\' else \'\' end  as Schrott, " +
+					"fehler_art.sfarttext as Ausfallparameter, " +
+					"roh.sartikelnr as ROH, " +
+					"roh.sartikelbez as ROH_Bezeichnung, " +
+					"pri_kfr_repair.seinbauplatz as Einbauplatz, " +
+					"fert.sartikelnr as FERT, " +
+					"fert.sartikelbez as FERT_Bezeichnung " +
+					"from charge " +
+					"join pri_kfr_repair on charge.nlfdchargennr = pri_kfr_repair.nlfdchargennr " +
+					"join artikel roh on pri_kfr_repair.NLFDARTIKELNR = roh.nlfdartikelnr " +
+					"join pri_prodorder on pri_kfr_repair.NLFDPONR = pri_prodorder.nlfdponr " +
+					"join artikel fert on pri_prodorder.NLFDARTIKELNR = fert.nlfdartikelnr " +
+					"left outer join fehler_art on pri_kfr_repair.nlfdfartnr = fehler_art.nlfdfartnr " +
+					"left outer join rqms_pos p1 on charge.NLFDCHARGENNR = p1.NLFDCHARGENNR  " +
+					"left outer join (select rqms_pos.nrqnr, rqms_pos.nlfdposnr, rqms_pos.nlfdposnrref, rqms_pos.nlfdartikelnr, rqms_fehler.nlfdrepnr from rqms_pos join rqms_fehler on rqms_pos.nrqnr = rqms_fehler.nrqnr and rqms_pos.nlfdposnr = rqms_fehler.nlfdposnr ) p2 on p1.nrqnr = p2.nrqnr and p1.nlfdposnr = p2.nlfdposnrref and p2.nlfdartikelnr = pri_kfr_repair.nlfdartikelnr and p2.nlfdrepnr = pri_kfr_repair.nlfdrepnr " +
+					"left outer join rqms_mass on p2.nrqnr = rqms_mass.nrqnr and p2.nlfdposnr = rqms_mass.nlfdposnr and rqms_mass.nlfdmasnr = 299001 " + 
+					"where schargennr like \'" + fertigungsauftrag + "-A%\'");
         	crs.execute();
         } catch (SQLException e) {
         	printSQLException(e);
@@ -294,11 +552,23 @@ public class GUIManage extends JFrame {
 		boolean dataFound = false;
 		try {
 			query = "select charge.schargennr as ChargenNr, " +
-					"case when rqms_mass.nlfdmasnr is null then \'null\' else case when rqms_mass.dterledigtam is null then \'offen\' else \'abgeschl.\' end end as MN " +
+					"case when rqms_mass.nlfdmasnr is null then \'null\' else case when rqms_mass.dterledigtam is null then \'offen\' else \'abgeschl.\' end end as MN, " +
+					"case when pri_kfr_repair.nscrap = 1 then \'Schrott\' else \'\' end  as Schrott, " +
+					"fehler_art.sfarttext as Ausfallparameter, " +
+					"roh.sartikelnr as ROH, " +
+					"roh.sartikelbez as ROH_Bezeichnung, " +
+					"pri_kfr_repair.seinbauplatz as Einbauplatz, " +
+					"fert.sartikelnr as FERT, " +
+					"fert.sartikelbez as FERT_Bezeichnung " +
 					"from charge " +
-					"left outer join rqms_pos p1 on charge.NLFDCHARGENNR = p1.NLFDCHARGENNR " +
-					"left outer join rqms_pos p2 on p1.nrqnr = p2.nrqnr and p1.nlfdposnr = p2.nlfdposnrref " +
-					"left outer join rqms_mass on p2.nrqnr = rqms_mass.nrqnr and p2.nlfdposnr = rqms_mass.nlfdposnr and rqms_mass.nlfdmasnr = 299001 " +
+					"join pri_kfr_repair on charge.nlfdchargennr = pri_kfr_repair.nlfdchargennr " +
+					"join artikel roh on pri_kfr_repair.NLFDARTIKELNR = roh.nlfdartikelnr " +
+					"join pri_prodorder on pri_kfr_repair.NLFDPONR = pri_prodorder.nlfdponr " +
+					"join artikel fert on pri_prodorder.NLFDARTIKELNR = fert.nlfdartikelnr " +
+					"left outer join fehler_art on pri_kfr_repair.nlfdfartnr = fehler_art.nlfdfartnr " +
+					"left outer join rqms_pos p1 on charge.NLFDCHARGENNR = p1.NLFDCHARGENNR  " +
+					"left outer join (select rqms_pos.nrqnr, rqms_pos.nlfdposnr, rqms_pos.nlfdposnrref, rqms_pos.nlfdartikelnr, rqms_fehler.nlfdrepnr from rqms_pos join rqms_fehler on rqms_pos.nrqnr = rqms_fehler.nrqnr and rqms_pos.nlfdposnr = rqms_fehler.nlfdposnr ) p2 on p1.nrqnr = p2.nrqnr and p1.nlfdposnr = p2.nlfdposnrref and p2.nlfdartikelnr = pri_kfr_repair.nlfdartikelnr and p2.nlfdrepnr = pri_kfr_repair.nlfdrepnr " +
+					"left outer join rqms_mass on p2.nrqnr = rqms_mass.nrqnr and p2.nlfdposnr = rqms_mass.nlfdposnr and rqms_mass.nlfdmasnr = 299001 " + 
 					"where schargennr like \'" + fertigungsauftrag + "-A%\'";
 			stmt = con.createStatement();
 			rs = stmt.executeQuery(query);
@@ -494,5 +764,30 @@ public class GUIManage extends JFrame {
 			}
 		}
 	}
+	
+	public void actionPerformed(ActionEvent event) {  }
+
+	public void rowSetChanged(RowSetEvent event) {  }
+
+	public void rowChanged(RowSetEvent event) {
+		CachedRowSet currentRowSet = this.myQueryTableModel.myRowSet;
+		try {
+			currentRowSet.moveToCurrentRow();
+			myQueryTableModel = new QueryTableModel(myQueryTableModel.getRowSet());
+			table.setModel(myQueryTableModel);
+		} catch (SQLException ex) {
+			printSQLException(ex);
+			// Display the error in a dialog box.
+			JOptionPane.showMessageDialog(
+					GUIManage.this,
+					new String[] { // Display a 2-line message
+							ex.getClass().getName() + ": ",
+							ex.getMessage()
+					}
+			);
+		}
+	}
+
+	public void cursorMoved(RowSetEvent event) {  }
 	
 }

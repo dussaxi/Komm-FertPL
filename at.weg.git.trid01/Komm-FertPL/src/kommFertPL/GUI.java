@@ -10,9 +10,11 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumnModel;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -30,6 +32,8 @@ import javax.swing.JButton;
 import javax.swing.AbstractAction;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.NumberFormat;
@@ -68,17 +72,17 @@ public class GUI extends JFrame implements RowSetListener {
 	public String nameMA;
 
 	private JPanel contentPane;
-	private JTextField txtFertigungsauftrag;
+	private FocusTextField txtFertigungsauftrag;
 	private JLabel lblFertigungsauftrag;
-	private JTextField txtAnzahl;
+	private FocusTextField txtAnzahl;
 	private JLabel lblAnzahl;
-	private JTextField txtAnlage;
+	private FocusTextField txtAnlage;
 	private JLabel lblAnlage;
-	private JFormattedTextField txtDatum;
+	private FocusFormattedTextField txtDatum;
 	private JLabel lblDatum;
-	private JFormattedTextField txtZeitAnlieferung;
+	private FocusFormattedTextField txtZeitAnlieferung;
 	private JLabel lblZeitAnlieferung;
-	private JTextField txtNameMA;
+	private FocusTextField txtNameMA;
 	private JLabel lblNameMA;
 	private JButton btnDatenSpeichern;
 	private final Action action = new SwingAction();
@@ -150,7 +154,7 @@ public class GUI extends JFrame implements RowSetListener {
 		//gbc_lblFertigungsauftrag.fill = GridBagConstraints.HORIZONTAL;
 		panelInput.add(lblFertigungsauftrag, gbc_lblFertigungsauftrag);
 		
-		txtFertigungsauftrag = new JTextField();
+		txtFertigungsauftrag = new FocusTextField();
 		txtFertigungsauftrag.setText("1234567");
 		GridBagConstraints gbc_txtFertigungsauftrag = new GridBagConstraints();
 		gbc_txtFertigungsauftrag.gridwidth = 1;
@@ -170,7 +174,7 @@ public class GUI extends JFrame implements RowSetListener {
 		//gbc_lblAnzahl.fill = GridBagConstraints.HORIZONTAL;
 		panelInput.add(lblAnzahl, gbc_lblAnzahl);
 		
-		txtAnzahl = new JTextField();
+		txtAnzahl = new FocusTextField();
 		txtAnzahl.setText("10");
 		GridBagConstraints gbc_txtAnzahl = new GridBagConstraints();
 		gbc_txtAnzahl.gridwidth = 1;
@@ -191,7 +195,7 @@ public class GUI extends JFrame implements RowSetListener {
 		//gbc_lblAnlage.fill = GridBagConstraints.HORIZONTAL;
 		panelInput.add(lblAnlage, gbc_lblAnlage);
 		
-		txtAnlage = new JTextField();
+		txtAnlage = new FocusTextField();
 		txtAnlage.setText("TEST1A");
 		GridBagConstraints gbc_txtAnlage = new GridBagConstraints();
 		gbc_txtAnlage.gridwidth = 1;
@@ -212,7 +216,7 @@ public class GUI extends JFrame implements RowSetListener {
 		//gbc_lblDatum.fill = GridBagConstraints.HORIZONTAL;
 		panelInput.add(lblDatum, gbc_lblDatum);
 		
-		txtDatum = new JFormattedTextField(new SimpleDateFormat("d.M.yyyy"));
+		txtDatum = new FocusFormattedTextField(new SimpleDateFormat("d.M.yyyy"));
 		txtDatum.setValue(new Date());
 		GridBagConstraints gbc_txtDatum = new GridBagConstraints();
 		gbc_txtDatum.gridwidth = 1;
@@ -233,7 +237,7 @@ public class GUI extends JFrame implements RowSetListener {
 		//gbc_lblZeitAnlieferung.fill = GridBagConstraints.HORIZONTAL;
 		panelInput.add(lblZeitAnlieferung, gbc_lblZeitAnlieferung);
 		
-		txtZeitAnlieferung = new JFormattedTextField(new SimpleDateFormat("H:mm"));
+		txtZeitAnlieferung = new FocusFormattedTextField(new SimpleDateFormat("H:mm"));
 		txtZeitAnlieferung.setValue(new Date());
 		GridBagConstraints gbc_txtZeitAnlieferung = new GridBagConstraints();
 		gbc_txtZeitAnlieferung.gridwidth = 1;
@@ -254,7 +258,7 @@ public class GUI extends JFrame implements RowSetListener {
 		//gbc_lblNameMA.fill = GridBagConstraints.HORIZONTAL;
 		panelInput.add(lblNameMA, gbc_lblNameMA);
 		
-		txtNameMA = new JTextField();
+		txtNameMA = new FocusTextField();
 		txtNameMA.setText("Matthias Weg");
 		GridBagConstraints gbc_txtNameMA = new GridBagConstraints();
 		gbc_txtNameMA.gridwidth = 1;
@@ -321,6 +325,12 @@ public class GUI extends JFrame implements RowSetListener {
 
 	    table = new JTable(); // Displays the table
 	    table.setModel(myQueryTableModel);
+	    try {
+			updateMyQueryTable();
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 	    JScrollPane spTable = new JScrollPane(table);
 		table.setFillsViewportHeight(true);
@@ -328,7 +338,7 @@ public class GUI extends JFrame implements RowSetListener {
 		
 		JPanel panelCopyright = new JPanel(new FlowLayout());
 		
-		JLabel lblcopyright = new JLabel("Vers. 1.1 \u00A9 Matthias Weg, 5.8.2014");
+		JLabel lblcopyright = new JLabel("Vers. 1.2 \u00A9 Matthias Weg, 26.8.2014");
 		lblcopyright.setFont(new Font("Tahoma", Font.PLAIN, 10));
 		//lblcopyright.setHorizontalAlignment(SwingConstants.EAST);
 		panelCopyright.add(lblcopyright);
@@ -337,6 +347,7 @@ public class GUI extends JFrame implements RowSetListener {
 		contentPane.add(panelButtons);
 		contentPane.add(panelTable);
 		contentPane.add(panelCopyright);
+		contentPane.setPreferredSize(new Dimension(575, 575));
 	}
 	
 	public void updateMyQueryTable() throws SQLException {
@@ -344,11 +355,69 @@ public class GUI extends JFrame implements RowSetListener {
 		myQueryTableModel = new QueryTableModel(myCachedRowSet);
 		myQueryTableModel.addEventHandlersToRowSet(this);
 		table.setModel(myQueryTableModel);
+		TableColumnModel tcm = table.getColumnModel();
+	    tcm.getColumn(0).setPreferredWidth(25);		// ID
+	    tcm.getColumn(0).setMinWidth(25);
+	    tcm.getColumn(0).setMaxWidth(25);
+	    tcm.getColumn(1).setPreferredWidth(70);		// FAUF
+	    tcm.getColumn(1).setMinWidth(70);
+	    tcm.getColumn(1).setMaxWidth(70);
+	    tcm.getColumn(2).setPreferredWidth(50);		// Anzahl
+	    tcm.getColumn(2).setMinWidth(50);
+	    tcm.getColumn(2).setMaxWidth(50);
+	    tcm.getColumn(3).setPreferredWidth(80);		// Anlage
+	    tcm.getColumn(3).setMinWidth(80);
+	    tcm.getColumn(3).setMaxWidth(80);
+	    tcm.getColumn(4).setPreferredWidth(150);		// Datum Anlieferung
+	    tcm.getColumn(4).setMinWidth(150);
+	    tcm.getColumn(4).setMaxWidth(150);
+	    tcm.getColumn(5).setPreferredWidth(200);	// Name			
+	    tcm.getColumn(5).setMinWidth(200);
+	}
+	
+	static class FocusTextField extends JTextField {
+	    {
+	        addFocusListener(new FocusListener() {
+
+	            @Override
+	            public void focusGained(FocusEvent e) {
+	                FocusTextField.this.select(0, getText().length());
+	            }
+
+	            @Override
+	            public void focusLost(FocusEvent e) {
+	                FocusTextField.this.select(0, 0);
+	            }
+	        });
+	    }
+	}
+	
+	static class FocusFormattedTextField extends JFormattedTextField {
+		{		
+	        addFocusListener(new FocusListener() {
+
+	            @Override
+	            public void focusGained(FocusEvent e) {
+	                FocusFormattedTextField.this.select(0, getText().length());
+	            }
+
+	            @Override
+	            public void focusLost(FocusEvent e) {
+	                FocusFormattedTextField.this.select(0, 0);
+	            }
+	        });
+	    }
+		
+		public FocusFormattedTextField(SimpleDateFormat simpleDateFormat) {
+			super(simpleDateFormat);
+		}
+
 	}
 
 	// From http://docs.oracle.com/javase/tutorial/uiswing/components/table.html#data
 	// and http://www.java2s.com/Code/Java/Swing-JFC/DisplayResultSetinTableJTable.htm
     class QueryTableModel extends AbstractTableModel {
+    	String[] columnNames = {"ID", "FAUF", "Anz.", "Anlage", "Datum Anlief.", "Name"}; 
     	CachedRowSet myRowSet; // The ResultSet to interpret
     	ResultSetMetaData metadata; // Additional information about the results
     	int numcols, numrows; // How many rows and columns in the table
@@ -397,11 +466,7 @@ public class GUI extends JFrame implements RowSetListener {
         }
  
         public String getColumnName(int col) {
-        	try {
-        		return this.metadata.getColumnLabel(col + 1);
-        	} catch (SQLException e) {
-        		return e.toString();
-        	}
+        	return columnNames[col];
         }
  
         public Object getValueAt(int row, int col) {
