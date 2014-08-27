@@ -11,6 +11,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -27,6 +28,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
 import javax.swing.AbstractAction;
@@ -331,6 +333,7 @@ public class GUI extends JFrame implements RowSetListener {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+	    table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
 	    JScrollPane spTable = new JScrollPane(table);
 		table.setFillsViewportHeight(true);
@@ -480,6 +483,25 @@ public class GUI extends JFrame implements RowSetListener {
         	} catch (SQLException e) {
         		return e.toString();
         	}
+        }
+        
+        /**
+         * Deletes a row from the table at a given index
+         * @param rowIndex The row index to delete. Row index 0 is below the column
+         * headers
+         */
+        public void deleteRow(int rowIndex) {
+            if (rowIndex < 0)
+            {
+                return;
+            }
+            try {
+            	this.myRowSet.absolute(rowIndex);
+				this.myRowSet.deleteRow();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}        
         }
  
         /*

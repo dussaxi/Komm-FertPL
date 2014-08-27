@@ -63,6 +63,7 @@ import oracle.sql.NUMBER;
 
 import com.sun.rowset.CachedRowSetImpl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -407,6 +408,29 @@ public class GUIManage extends JFrame implements RowSetListener {
         		return e.toString();
         	}
         }
+        
+        /**
+         * Return a row from the table as a array of strings
+         * @param rowIndex The index of the row you would like
+         * @return Returns the row from the table as an array of strings or null if
+         * the index is invalid
+         */
+        public String[] getRowData(int rowIndex) {
+        	//test the index
+            if ((rowIndex  >  getRowCount()) || (rowIndex  <  0)) {
+                return null;
+            }
+            ArrayList<String> data = new ArrayList<String>();
+            for (int c = 0; c  <  getColumnCount(); c++) {
+                data.add((String) getValueAt(rowIndex, c));
+            }
+            String[] retVal = new String[data.size()];
+            for (int i = 0; i  <  retVal.length; i++)
+            {
+                retVal[i] = data.get(i);
+            }
+            return retVal;
+        }
  
         /*
          * JTable uses this method to determine the default renderer/
@@ -547,60 +571,60 @@ public class GUIManage extends JFrame implements RowSetListener {
         } 
 	}
 
-	private void searchSerialNumbers() {
-		String query = null;
-		boolean dataFound = false;
-		try {
-			query = "select charge.schargennr as ChargenNr, " +
-					"case when rqms_mass.nlfdmasnr is null then \'null\' else case when rqms_mass.dterledigtam is null then \'offen\' else \'abgeschl.\' end end as MN, " +
-					"case when pri_kfr_repair.nscrap = 1 then \'Schrott\' else \'\' end  as Schrott, " +
-					"fehler_art.sfarttext as Ausfallparameter, " +
-					"roh.sartikelnr as ROH, " +
-					"roh.sartikelbez as ROH_Bezeichnung, " +
-					"pri_kfr_repair.seinbauplatz as Einbauplatz, " +
-					"fert.sartikelnr as FERT, " +
-					"fert.sartikelbez as FERT_Bezeichnung " +
-					"from charge " +
-					"join pri_kfr_repair on charge.nlfdchargennr = pri_kfr_repair.nlfdchargennr " +
-					"join artikel roh on pri_kfr_repair.NLFDARTIKELNR = roh.nlfdartikelnr " +
-					"join pri_prodorder on pri_kfr_repair.NLFDPONR = pri_prodorder.nlfdponr " +
-					"join artikel fert on pri_prodorder.NLFDARTIKELNR = fert.nlfdartikelnr " +
-					"left outer join fehler_art on pri_kfr_repair.nlfdfartnr = fehler_art.nlfdfartnr " +
-					"left outer join rqms_pos p1 on charge.NLFDCHARGENNR = p1.NLFDCHARGENNR  " +
-					"left outer join (select rqms_pos.nrqnr, rqms_pos.nlfdposnr, rqms_pos.nlfdposnrref, rqms_pos.nlfdartikelnr, rqms_fehler.nlfdrepnr from rqms_pos join rqms_fehler on rqms_pos.nrqnr = rqms_fehler.nrqnr and rqms_pos.nlfdposnr = rqms_fehler.nlfdposnr ) p2 on p1.nrqnr = p2.nrqnr and p1.nlfdposnr = p2.nlfdposnrref and p2.nlfdartikelnr = pri_kfr_repair.nlfdartikelnr and p2.nlfdrepnr = pri_kfr_repair.nlfdrepnr " +
-					"left outer join rqms_mass on p2.nrqnr = rqms_mass.nrqnr and p2.nlfdposnr = rqms_mass.nlfdposnr and rqms_mass.nlfdmasnr = 299001 " + 
-					"where schargennr like \'" + fertigungsauftrag + "-A%\'";
-			stmt = con.createStatement();
-			rs = stmt.executeQuery(query);
-			listModel.clear();
-			while (rs.next()) {
-				dataFound = true;
-				// Fill the panelMassnahmen
-				listModel.addElement(rs.getString(1) + "     " + rs.getString(2));
-			}
-		} catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-        	if (stmt != null) { 
-        		try {
-        			stmt.close();
-        		} catch (SQLException e) {
-        			e.printStackTrace();
-        		} 
-        	}
-        }
-		if (!dataFound) {
-			JOptionPane.showMessageDialog(null,
-				    "Keine Maßnahmen vorhanden",
-				    "Maßnahmen zum FAUF",
-				    JOptionPane.INFORMATION_MESSAGE);
-		}
-	}
+//	private void searchSerialNumbers() {
+//		String query = null;
+//		boolean dataFound = false;
+//		try {
+//			query = "select charge.schargennr as ChargenNr, " +
+//					"case when rqms_mass.nlfdmasnr is null then \'null\' else case when rqms_mass.dterledigtam is null then \'offen\' else \'abgeschl.\' end end as MN, " +
+//					"case when pri_kfr_repair.nscrap = 1 then \'Schrott\' else \'\' end  as Schrott, " +
+//					"fehler_art.sfarttext as Ausfallparameter, " +
+//					"roh.sartikelnr as ROH, " +
+//					"roh.sartikelbez as ROH_Bezeichnung, " +
+//					"pri_kfr_repair.seinbauplatz as Einbauplatz, " +
+//					"fert.sartikelnr as FERT, " +
+//					"fert.sartikelbez as FERT_Bezeichnung " +
+//					"from charge " +
+//					"join pri_kfr_repair on charge.nlfdchargennr = pri_kfr_repair.nlfdchargennr " +
+//					"join artikel roh on pri_kfr_repair.NLFDARTIKELNR = roh.nlfdartikelnr " +
+//					"join pri_prodorder on pri_kfr_repair.NLFDPONR = pri_prodorder.nlfdponr " +
+//					"join artikel fert on pri_prodorder.NLFDARTIKELNR = fert.nlfdartikelnr " +
+//					"left outer join fehler_art on pri_kfr_repair.nlfdfartnr = fehler_art.nlfdfartnr " +
+//					"left outer join rqms_pos p1 on charge.NLFDCHARGENNR = p1.NLFDCHARGENNR  " +
+//					"left outer join (select rqms_pos.nrqnr, rqms_pos.nlfdposnr, rqms_pos.nlfdposnrref, rqms_pos.nlfdartikelnr, rqms_fehler.nlfdrepnr from rqms_pos join rqms_fehler on rqms_pos.nrqnr = rqms_fehler.nrqnr and rqms_pos.nlfdposnr = rqms_fehler.nlfdposnr ) p2 on p1.nrqnr = p2.nrqnr and p1.nlfdposnr = p2.nlfdposnrref and p2.nlfdartikelnr = pri_kfr_repair.nlfdartikelnr and p2.nlfdrepnr = pri_kfr_repair.nlfdrepnr " +
+//					"left outer join rqms_mass on p2.nrqnr = rqms_mass.nrqnr and p2.nlfdposnr = rqms_mass.nlfdposnr and rqms_mass.nlfdmasnr = 299001 " + 
+//					"where schargennr like \'" + fertigungsauftrag + "-A%\'";
+//			stmt = con.createStatement();
+//			rs = stmt.executeQuery(query);
+//			listModel.clear();
+//			while (rs.next()) {
+//				dataFound = true;
+//				// Fill the panelMassnahmen
+//				listModel.addElement(rs.getString(1) + "     " + rs.getString(2));
+//			}
+//		} catch (SQLException e) {
+//            e.printStackTrace();
+//        } finally {
+//        	if (stmt != null) { 
+//        		try {
+//        			stmt.close();
+//        		} catch (SQLException e) {
+//        			e.printStackTrace();
+//        		} 
+//        	}
+//        }
+//		if (!dataFound) {
+//			JOptionPane.showMessageDialog(null,
+//				    "Keine Maßnahmen vorhanden",
+//				    "Maßnahmen zum FAUF",
+//				    JOptionPane.INFORMATION_MESSAGE);
+//		}
+//	}
 	
 	private void closeActions() {
 		// Get marked actions from the list and close them in RQMS
 		// First we get the marked items from the list and cycle through it
-		List<String> values = list.getSelectedValuesList();
+		int[] selectedRows = table.getSelectedRows();
 		boolean dataFound = false;
 		String query;
 		long nrqnr_long;
@@ -609,18 +633,15 @@ public class GUIManage extends JFrame implements RowSetListener {
 		int nUpdated = 0;
 		
 		try {
-			for(Iterator<String> i = values.iterator(); i.hasNext(); ) {
-			    String item = i.next();
-			    String[] parts = item.split("     ");
-			    String part1 = parts[0]; // 1234567-A111111
-			    String part2 = parts[1]; // abgeschl. etc.
+			for(int i = 0; i < selectedRows.length; i++) {
+				String schargennr = (String) table.getModel().getValueAt(selectedRows[i], 0);
 			    // Now close the action on the database.
 		    	query = "select rqms_mass.nrqnr, rqms_mass.nlfdposnr, rqms_mass.nlfdmasnr " +
 		    		"from rqms_mass " +
 		    		"join rqms_pos p2 on rqms_mass.nrqnr = p2.nrqnr and rqms_mass.nlfdposnr = p2.nlfdposnr " +
 		    		"join rqms_pos p1 on p2.nrqnr = p1.nrqnr and p2.nlfdposnrref = p1.nlfdposnr " +
 		    		"join charge on p1.NLFDCHARGENNR = charge.NLFDCHARGENNR " +
-		    		"where charge.SCHARGENNR = \'" + part1 + "\'";
+		    		"where charge.SCHARGENNR = \'" + schargennr + "\'";
 				stmt = con.createStatement();
 				rs = stmt.executeQuery(query);
 				if (rs.next()) {
@@ -640,7 +661,7 @@ public class GUIManage extends JFrame implements RowSetListener {
 					nUpdated++;					
 				}
 			}
-			searchSerialNumbers();
+			updateMyQueryTable();
 			JOptionPane.showMessageDialog(null,
 				    nUpdated + " Maßnahmen wurden abgeschlossen.",
 				    "Anzahl Maßnahmen abgeschlossen",
@@ -654,7 +675,8 @@ public class GUIManage extends JFrame implements RowSetListener {
 		// TODO open the actions
 		// Get marked actions from the list and open them in RQMS
 		// First we get the marked items from the list and cycle through it
-		List<String> values = list.getSelectedValuesList();
+		//List<String> values = list.getSelectedValuesList();
+		int[] selectedRows = table.getSelectedRows();
 		boolean dataFound = false;
 		String query;
 		long nrqnr_long;
@@ -663,18 +685,15 @@ public class GUIManage extends JFrame implements RowSetListener {
 		int nUpdated = 0;
 		
 		try {
-			for(Iterator<String> i = values.iterator(); i.hasNext(); ) {
-			    String item = i.next();
-			    String[] parts = item.split("     ");
-			    String part1 = parts[0]; // 1234567-A111111
-			    String part2 = parts[1]; // abgeschl. etc.
+			for(int i = 0; i < selectedRows.length; i++) {
+			    String schargennr = (String) table.getModel().getValueAt(selectedRows[i], 0);
 			    // Now close the action on the database.
 		    	query = "select rqms_mass.nrqnr, rqms_mass.nlfdposnr, rqms_mass.nlfdmasnr " +
 		    		"from rqms_mass " +
 		    		"join rqms_pos p2 on rqms_mass.nrqnr = p2.nrqnr and rqms_mass.nlfdposnr = p2.nlfdposnr " +
 		    		"join rqms_pos p1 on p2.nrqnr = p1.nrqnr and p2.nlfdposnrref = p1.nlfdposnr " +
 		    		"join charge on p1.NLFDCHARGENNR = charge.NLFDCHARGENNR " +
-		    		"where charge.SCHARGENNR = \'" + part1 + "\'";
+		    		"where charge.SCHARGENNR = \'" + schargennr + "\'";
 				stmt = con.createStatement();
 				rs = stmt.executeQuery(query);
 				if (rs.next()) {
@@ -694,7 +713,7 @@ public class GUIManage extends JFrame implements RowSetListener {
 					nUpdated++;					
 				}
 			}
-			searchSerialNumbers();
+			updateMyQueryTable();
 			JOptionPane.showMessageDialog(null,
 				    nUpdated + " Maßnahmen wurden wieder geöffnet.",
 				    "Anzahl Maßnahmen geöffnet",
