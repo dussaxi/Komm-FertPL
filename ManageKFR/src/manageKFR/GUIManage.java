@@ -2,6 +2,7 @@ package manageKFR;
 
 import java.awt.EventQueue;
 
+import javax.imageio.ImageIO;
 import javax.sql.RowSetEvent;
 import javax.sql.RowSetListener;
 import javax.sql.rowset.CachedRowSet;
@@ -22,11 +23,13 @@ import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Insets;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollBar;
@@ -86,6 +89,8 @@ public class GUIManage extends JFrame implements RowSetListener {
 //	private final Action action = new SwingAction();
 	private JButton btnMNAbschliessen;
 	private JButton btnMNoffen;
+	private JButton btnSchrottJa;
+	private JButton btnSchrottNein;
 	private JList list;
 	private DefaultListModel listModel;
 	private JLabel lblAnzahl;
@@ -108,6 +113,10 @@ public class GUIManage extends JFrame implements RowSetListener {
 			public void run() {
 				try {
 					GUIManage frame = new GUIManage();
+					ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+					Image logo = ImageIO.read(this.getClass().getResource("Komm-FertPL.jpg"));
+					ImageIcon imgicon = new ImageIcon(logo);
+					frame.setIconImage(imgicon.getImage());
 					frame.pack();
 					frame.setVisible(true);
 				} catch (Exception e) {
@@ -264,10 +273,24 @@ public class GUIManage extends JFrame implements RowSetListener {
 			}
 		});
 		panelButton.add(btnMNoffen);
+		btnSchrottJa= new JButton("Schrott: JA");
+		btnSchrottJa.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				setSchrott();
+			}
+		});
+		panelButton.add(btnSchrottJa);
+		btnSchrottNein= new JButton("Schrott: NEIN");
+		btnSchrottNein.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				removeSchrott();
+			}
+		});
+		panelButton.add(btnSchrottNein);
 		
 		JPanel panelCopyright = new JPanel(new FlowLayout());
 		
-		JLabel lblcopyright = new JLabel("Vers. 1.1 \u00A9 Matthias Weg, 26.8.2014");
+		JLabel lblcopyright = new JLabel("Vers. 1.2 \u00A9 Matthias Weg, 29.8.2014");
 		lblcopyright.setFont(new Font("Tahoma", Font.PLAIN, 10));
 		//lblcopyright.setHorizontalAlignment(SwingConstants.EAST);
 		panelCopyright.add(lblcopyright);
@@ -278,7 +301,7 @@ public class GUIManage extends JFrame implements RowSetListener {
 		contentPane.add(panelTable);
 		contentPane.add(panelButton);
 		contentPane.add(panelCopyright);
-		contentPane.setPreferredSize(new Dimension(1000, 570));
+		contentPane.setPreferredSize(new Dimension(1200, 570));
 	}
 	
 	static class FocusTextField extends JTextField {
@@ -304,8 +327,8 @@ public class GUIManage extends JFrame implements RowSetListener {
 		myQueryTableModel.addEventHandlersToRowSet(this);
 		table.setModel(myQueryTableModel);
 		TableColumnModel tcm = table.getColumnModel();
-	    tcm.getColumn(0).setPreferredWidth(100);		// Chargennummer
-	    tcm.getColumn(0).setMinWidth(100);
+	    tcm.getColumn(0).setPreferredWidth(120);		// Chargennummer
+	    tcm.getColumn(0).setMinWidth(120);
 	    tcm.getColumn(0).setMaxWidth(100);
 	    tcm.getColumn(1).setPreferredWidth(67);			// Maﬂnahmenstatus
 	    tcm.getColumn(1).setMinWidth(67);
@@ -329,12 +352,16 @@ public class GUIManage extends JFrame implements RowSetListener {
 	    tcm.getColumn(7).setMaxWidth(100);
 	    tcm.getColumn(8).setPreferredWidth(200);		// Artikelbezeichnung FERT
 	    tcm.getColumn(8).setMinWidth(200);
+	    tcm.getColumn(9).setPreferredWidth(0);			// NLFDREPNR
+	    tcm.getColumn(9).setMinWidth(0);
+	    tcm.getColumn(9).setMaxWidth(0);
+	    
 	}
 
 	// From http://docs.oracle.com/javase/tutorial/uiswing/components/table.html#data
 	// and http://www.java2s.com/Code/Java/Swing-JFC/DisplayResultSetinTableJTable.htm
     class QueryTableModel extends AbstractTableModel {
-    	String[] columnNames = {"Seriennummer", "MN Status", "Schrott?", "Ausfallparameter", "ROH Art.Nr.", "ROH Art.Bez.", "Einbaupl.", "FERT Art.Nr.", "FERT Art.Bez."}; 
+    	String[] columnNames = {"Seriennummer", "MN Status", "Schrott?", "Ausfallparameter", "ROH Art.Nr.", "ROH Art.Bez.", "Einbaupl.", "FERT Art.Nr.", "FERT Art.Bez.", "NLFDREPNR"}; 
     	CachedRowSet myRowSet; // The ResultSet to interpret
     	ResultSetMetaData metadata; // Additional information about the results
     	int numcols, numrows; // How many rows and columns in the table
@@ -388,11 +415,6 @@ public class GUIManage extends JFrame implements RowSetListener {
         }
  
         public String getColumnName(int col) {
-//        	try {
-//        		return this.metadata.getColumnLabel(col + 1);
-//        	} catch (SQLException e) {
-//        		return e.toString();
-//        	}
         	return columnNames[col];
         }
  
@@ -449,11 +471,6 @@ public class GUIManage extends JFrame implements RowSetListener {
         public boolean isCellEditable(int row, int col) {
             //Note that the data/cell address is constant,
             //no matter where the cell appears onscreen.
-//            if (col < 2) {
-//                return false;
-//            } else {
-//                return true;
-//            }
         	return false;
         }
  
@@ -489,7 +506,8 @@ public class GUIManage extends JFrame implements RowSetListener {
 					"roh.sartikelbez as ROH_Bezeichnung, " +
 					"pri_kfr_repair.seinbauplatz as Einbauplatz, " +
 					"fert.sartikelnr as FERT, " +
-					"fert.sartikelbez as FERT_Bezeichnung " +
+					"fert.sartikelbez as FERT_Bezeichnung, " +
+					"pri_kfr_repair.nlfdrepnr as NLFDREPNR " + 
 					"from charge " +
 					"join pri_kfr_repair on charge.nlfdchargennr = pri_kfr_repair.nlfdchargennr " +
 					"join artikel roh on pri_kfr_repair.NLFDARTIKELNR = roh.nlfdartikelnr " +
@@ -672,7 +690,6 @@ public class GUIManage extends JFrame implements RowSetListener {
 	}
 	
 	private void openActions() {
-		// TODO open the actions
 		// Get marked actions from the list and open them in RQMS
 		// First we get the marked items from the list and cycle through it
 		//List<String> values = list.getSelectedValuesList();
@@ -723,6 +740,79 @@ public class GUIManage extends JFrame implements RowSetListener {
 		}
 	}
 	
+	/** Sets the Schrott Flag for all selected rows in the GUI table
+	 * 
+	 * @return				Boolean value true = success
+	 */
+	private boolean setSchrott() {
+		return updateSchrott(1);
+	}
+	
+	/** Removes the Schrott Flag for all selected rows in the GUI table
+	 * 
+	 * @return				Boolean value true = success
+	 */
+	private boolean removeSchrott() {
+		return updateSchrott(0);
+	}
+	
+	/** Updates the Schrott Flag for the selected rows in the GUI table
+	 * 
+	 * @param schrottFlag	0 = remove Flag, 1 = set Flag
+	 * @return				Boolean value true = values updated, false = no values updated	
+	 */
+	private boolean updateSchrott(int schrottFlag) {
+		int[] selectedRows = table.getSelectedRows();
+		boolean dataFound = false;
+		String query;
+		ArrayList<Long> nlfdrepnr = new ArrayList<Long>();
+		int nUpdated = 0;
+		
+		// Get marked serial numbers from the list and un-mark them as "Schrott" in KFR
+		// First we get the marked items from the list and cycle through it
+		try {
+			for(int i = 0; i < selectedRows.length; i++) {
+			    String schargennr = (String) table.getModel().getValueAt(selectedRows[i], 0);
+			    // 
+		    	query = "select pri_kfr_repair.nlfdrepnr " +
+		    				"from pri_kfr_repair " +
+		    				"join charge on pri_kfr_repair.nlfdchargennr = charge.nlfdchargennr " +
+		    				"where charge.schargennr Like \'" + schargennr + "\'";
+				stmt = con.createStatement();
+				rs = stmt.executeQuery(query);
+				while (rs.next()) {
+					dataFound = true;
+					nlfdrepnr.add(rs.getLong(1));
+				}
+				Iterator itr = nlfdrepnr.iterator();
+				String nlfdrepnrCollection = "(";
+				int c = 0;
+				while (itr.hasNext()) {
+					c++;
+					nlfdrepnrCollection = nlfdrepnrCollection + itr.next().toString() + ", ";
+				}
+				nlfdrepnrCollection = nlfdrepnrCollection.substring(0, nlfdrepnrCollection.length()-2);
+				nlfdrepnrCollection = nlfdrepnrCollection + ")";
+				// remove the Schrottflag
+				query = "update pri_kfr_repair " +
+						"set nscrap = 0 " + 
+						"where nlfdrepnr in " + nlfdrepnrCollection;
+				stmt = con.createStatement();
+				rs = stmt.executeQuery(query);
+				nUpdated++;					
+			}
+// TODO: Hier gehts weiter			
+			updateMyQueryTable();
+			JOptionPane.showMessageDialog(null,
+				    nUpdated + " Seriennummern wurden mit Schrott markiert.",
+				    "Schrott Markierung",
+				    JOptionPane.INFORMATION_MESSAGE);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return dataFound;
+	}
+
 	public Boolean checkConditions() {
 	// Check if data input is OK.
 		// Feritungsauftrag = nummerisch?

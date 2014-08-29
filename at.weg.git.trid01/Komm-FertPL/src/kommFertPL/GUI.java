@@ -2,6 +2,7 @@ package kommFertPL;
 
 import java.awt.EventQueue;
 
+import javax.imageio.ImageIO;
 import javax.sql.RowSetEvent;
 import javax.sql.RowSetListener;
 import javax.sql.rowset.CachedRowSet;
@@ -20,9 +21,11 @@ import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Insets;
 
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -44,6 +47,7 @@ import java.text.ParsePosition;
 import javax.swing.Action;
 
 import java.awt.event.ActionListener;
+import java.net.URL;
 import java.sql.*;
 import java.io.*;
 
@@ -108,6 +112,10 @@ public class GUI extends JFrame implements RowSetListener {
 			public void run() {
 				try {
 					GUI frame = new GUI();
+					ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+					Image logo = ImageIO.read(this.getClass().getResource("Komm-FertPL.jpg"));
+					ImageIcon imgicon = new ImageIcon(logo);
+					frame.setIconImage(imgicon.getImage());
 					frame.pack();
 					frame.setVisible(true);
 				} catch (Exception e) {
