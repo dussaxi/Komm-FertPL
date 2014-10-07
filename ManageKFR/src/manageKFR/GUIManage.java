@@ -114,7 +114,7 @@ public class GUIManage extends JFrame implements RowSetListener {
 				try {
 					GUIManage frame = new GUIManage();
 					ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-					Image logo = ImageIO.read(this.getClass().getResource("Komm-FertPL.jpg"));
+					Image logo = ImageIO.read(this.getClass().getResource("Maﬂnahmen.jpg"));
 					ImageIcon imgicon = new ImageIcon(logo);
 					frame.setIconImage(imgicon.getImage());
 					frame.pack();
@@ -155,9 +155,10 @@ public class GUIManage extends JFrame implements RowSetListener {
 		JPanel panelInput = new JPanel(new GridBagLayout());
 				
 		lblFertigungsauftrag = new JLabel("Fertigungsauftrag"); 
+		lblFertigungsauftrag.setFont(lblFertigungsauftrag.getFont().deriveFont(24f));
 		GridBagConstraints gbc_lblFertigungsauftrag = new GridBagConstraints();
 		gbc_lblFertigungsauftrag.gridwidth = 1;
-		gbc_lblFertigungsauftrag.insets = new Insets(5, 5, 5, 5);
+		gbc_lblFertigungsauftrag.insets = new Insets(0, 0, 5, 5);
 		gbc_lblFertigungsauftrag.anchor = GridBagConstraints.EAST;
 		gbc_lblFertigungsauftrag.gridx = 0;
 		gbc_lblFertigungsauftrag.gridy = 0;
@@ -165,11 +166,13 @@ public class GUIManage extends JFrame implements RowSetListener {
 		
 		txtFertigungsauftrag = new FocusTextField();
 		txtFertigungsauftrag.setText("1234567");
-		txtFertigungsauftrag.setPreferredSize(new Dimension(100,20));
+		txtFertigungsauftrag.setPreferredSize(new Dimension(130,30));
 		txtFertigungsauftrag.setHorizontalAlignment(JTextField.CENTER);
+		txtFertigungsauftrag.setFont(txtFertigungsauftrag.getFont().deriveFont(24f));
+		txtFertigungsauftrag.setMargin(new Insets(0, 10, 0, 10));
 		GridBagConstraints gbc_txtFertigungsauftrag = new GridBagConstraints();
 		gbc_txtFertigungsauftrag.gridwidth = 1;
-		gbc_txtFertigungsauftrag.insets = new Insets(5, 5, 5, 5);
+		gbc_txtFertigungsauftrag.insets = new Insets(0, 0, 5, 5);
 		gbc_txtFertigungsauftrag.anchor = GridBagConstraints.WEST;
 		gbc_txtFertigungsauftrag.gridx = 1;
 		gbc_txtFertigungsauftrag.gridy = 0;
@@ -246,7 +249,7 @@ public class GUIManage extends JFrame implements RowSetListener {
 		
 	    JScrollPane spTable = new JScrollPane(table);
 	    spTable.setPreferredSize(new Dimension(800, 400));
-	    spTable.setMinimumSize(new Dimension(800, 400));
+//	    spTable.setMinimumSize(new Dimension(800, 400));
 //	    spTable.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 //	    spTable.setHorizontalScrollBar(new JScrollBar());
 	    
@@ -258,6 +261,8 @@ public class GUIManage extends JFrame implements RowSetListener {
 		panelTable.add(lblAnzahl, BorderLayout.PAGE_END);
 		
 		JPanel panelButton = new JPanel(new FlowLayout());
+		panelButton.setPreferredSize(new Dimension(800, 50));
+		panelButton.setMinimumSize(new Dimension(800, 50));
 		
 		btnMNAbschliessen = new JButton("MN abschlieﬂen");
 		btnMNAbschliessen.addActionListener(new ActionListener() {
@@ -290,7 +295,7 @@ public class GUIManage extends JFrame implements RowSetListener {
 		
 		JPanel panelCopyright = new JPanel(new FlowLayout());
 		
-		JLabel lblcopyright = new JLabel("Vers. 1.2 \u00A9 Matthias Weg, 29.8.2014");
+		JLabel lblcopyright = new JLabel("Vers. 1.3 \u00A9 Matthias Weg, 7.10.2014");
 		lblcopyright.setFont(new Font("Tahoma", Font.PLAIN, 10));
 		//lblcopyright.setHorizontalAlignment(SwingConstants.EAST);
 		panelCopyright.add(lblcopyright);
@@ -302,6 +307,7 @@ public class GUIManage extends JFrame implements RowSetListener {
 		contentPane.add(panelButton);
 		contentPane.add(panelCopyright);
 		contentPane.setPreferredSize(new Dimension(1200, 570));
+		this.getRootPane().setDefaultButton(btnSuchen);
 	}
 	
 	static class FocusTextField extends JTextField {
@@ -516,7 +522,7 @@ public class GUIManage extends JFrame implements RowSetListener {
 					"left outer join fehler_art on pri_kfr_repair.nlfdfartnr = fehler_art.nlfdfartnr " +
 					"left outer join rqms_pos p1 on charge.NLFDCHARGENNR = p1.NLFDCHARGENNR  " +
 					"left outer join (select rqms_pos.nrqnr, rqms_pos.nlfdposnr, rqms_pos.nlfdposnrref, rqms_pos.nlfdartikelnr, rqms_fehler.nlfdrepnr from rqms_pos join rqms_fehler on rqms_pos.nrqnr = rqms_fehler.nrqnr and rqms_pos.nlfdposnr = rqms_fehler.nlfdposnr ) p2 on p1.nrqnr = p2.nrqnr and p1.nlfdposnr = p2.nlfdposnrref and p2.nlfdartikelnr = pri_kfr_repair.nlfdartikelnr and p2.nlfdrepnr = pri_kfr_repair.nlfdrepnr " +
-					"left outer join rqms_mass on p2.nrqnr = rqms_mass.nrqnr and p2.nlfdposnr = rqms_mass.nlfdposnr and rqms_mass.nlfdmasnr = 299001 " + 
+					"left outer join rqms_mass on p2.nrqnr = rqms_mass.nrqnr and p2.nlfdposnr = rqms_mass.nlfdposnr and rqms_mass.nlfdmasnr = 301001 " + 
 					"where schargennr like \'" + fertigungsauftrag + "-A%\'");
         	crs.execute();
         } catch (SQLException e) {

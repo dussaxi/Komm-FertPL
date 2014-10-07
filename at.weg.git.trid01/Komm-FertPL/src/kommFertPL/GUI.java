@@ -55,7 +55,9 @@ import javax.swing.JFormattedTextField;
 
 import com.sun.rowset.CachedRowSetImpl;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Vector;
 import java.text.SimpleDateFormat;
 import java.awt.Font;
@@ -155,9 +157,10 @@ public class GUI extends JFrame implements RowSetListener {
 		JPanel panelInput = new JPanel(new GridBagLayout());
 				
 		lblFertigungsauftrag = new JLabel("Fertigungsauftrag"); 
+		lblFertigungsauftrag.setFont(lblFertigungsauftrag.getFont().deriveFont(24f));
 		GridBagConstraints gbc_lblFertigungsauftrag = new GridBagConstraints();
 		gbc_lblFertigungsauftrag.gridwidth = 1;
-		gbc_lblFertigungsauftrag.insets = new Insets(0, 0, 5, 5);
+		gbc_lblFertigungsauftrag.insets = new Insets(5, 0, 5, 5);
 		gbc_lblFertigungsauftrag.anchor = GridBagConstraints.EAST;
 		gbc_lblFertigungsauftrag.gridx = 0;
 		gbc_lblFertigungsauftrag.gridy = 0;
@@ -166,15 +169,18 @@ public class GUI extends JFrame implements RowSetListener {
 		
 		txtFertigungsauftrag = new FocusTextField();
 		txtFertigungsauftrag.setText("1234567");
+		txtFertigungsauftrag.setFont(txtFertigungsauftrag.getFont().deriveFont(24f));
+		txtFertigungsauftrag.setMargin(new Insets(0, 10, 0, 109));
 		GridBagConstraints gbc_txtFertigungsauftrag = new GridBagConstraints();
 		gbc_txtFertigungsauftrag.gridwidth = 1;
-		gbc_txtFertigungsauftrag.insets = new Insets(0, 0, 5, 5);
+		gbc_txtFertigungsauftrag.insets = new Insets(5, 0, 5, 5);
 		gbc_txtFertigungsauftrag.anchor = GridBagConstraints.WEST;
 		gbc_txtFertigungsauftrag.gridx = 1;
 		gbc_txtFertigungsauftrag.gridy = 0;
 		panelInput.add(txtFertigungsauftrag, gbc_txtFertigungsauftrag);
 		
 		lblAnzahl = new JLabel("Anzahl");
+		lblAnzahl.setFont(lblAnzahl.getFont().deriveFont(24f));
 		GridBagConstraints gbc_lblAnzahl = new GridBagConstraints();
 		gbc_lblAnzahl.gridwidth = 1;
 		gbc_lblAnzahl.insets = new Insets(0, 0, 5, 5);
@@ -186,6 +192,8 @@ public class GUI extends JFrame implements RowSetListener {
 		
 		txtAnzahl = new FocusTextField();
 		txtAnzahl.setText("10");
+		txtAnzahl.setFont(txtAnzahl.getFont().deriveFont(24f));
+		txtAnzahl.setMargin(new Insets(0, 10, 0, 0));
 		GridBagConstraints gbc_txtAnzahl = new GridBagConstraints();
 		gbc_txtAnzahl.gridwidth = 1;
 		gbc_txtAnzahl.insets = new Insets(0, 0, 5, 5);
@@ -196,6 +204,7 @@ public class GUI extends JFrame implements RowSetListener {
 		txtAnzahl.setColumns(10);
 		
 		lblAnlage = new JLabel("Anlage");
+		lblAnlage.setFont(lblAnlage.getFont().deriveFont(24f));
 		GridBagConstraints gbc_lblAnlage = new GridBagConstraints();
 		gbc_lblAnlage.gridwidth = 1;
 		gbc_lblAnlage.insets = new Insets(0, 0, 5, 5);
@@ -207,6 +216,8 @@ public class GUI extends JFrame implements RowSetListener {
 		
 		txtAnlage = new FocusTextField();
 		txtAnlage.setText("TEST1A");
+		txtAnlage.setFont(txtAnlage.getFont().deriveFont(24f));
+		txtAnlage.setMargin(new Insets(0, 10, 0, 0));
 		GridBagConstraints gbc_txtAnlage = new GridBagConstraints();
 		gbc_txtAnlage.gridwidth = 1;
 		gbc_txtAnlage.insets = new Insets(0, 0, 5, 5);
@@ -217,6 +228,7 @@ public class GUI extends JFrame implements RowSetListener {
 		txtAnlage.setColumns(10);
 		
 		lblDatum = new JLabel("Datum");
+		lblDatum.setFont(lblDatum.getFont().deriveFont(24f));
 		GridBagConstraints gbc_lblDatum = new GridBagConstraints();
 		gbc_lblDatum.gridwidth = 1;
 		gbc_lblDatum.insets = new Insets(0, 0, 5, 5);
@@ -228,6 +240,8 @@ public class GUI extends JFrame implements RowSetListener {
 		
 		txtDatum = new FocusFormattedTextField(new SimpleDateFormat("d.M.yyyy"));
 		txtDatum.setValue(new Date());
+		txtDatum.setFont(txtDatum.getFont().deriveFont(24f));
+		txtDatum.setMargin(new Insets(0, 10, 0, 0));
 		GridBagConstraints gbc_txtDatum = new GridBagConstraints();
 		gbc_txtDatum.gridwidth = 1;
 		gbc_txtDatum.insets = new Insets(0, 0, 5, 5);
@@ -238,6 +252,7 @@ public class GUI extends JFrame implements RowSetListener {
 		txtDatum.setColumns(10);
 		
 		lblZeitAnlieferung = new JLabel("Zeit der Anlieferung");
+		lblZeitAnlieferung.setFont(lblZeitAnlieferung.getFont().deriveFont(24f));
 		GridBagConstraints gbc_lblZeitAnlieferung = new GridBagConstraints();
 		gbc_lblZeitAnlieferung.gridwidth = 1;
 		gbc_lblZeitAnlieferung.insets = new Insets(0, 0, 5, 5);
@@ -249,6 +264,8 @@ public class GUI extends JFrame implements RowSetListener {
 		
 		txtZeitAnlieferung = new FocusFormattedTextField(new SimpleDateFormat("H:mm"));
 		txtZeitAnlieferung.setValue(new Date());
+		txtZeitAnlieferung.setFont(txtZeitAnlieferung.getFont().deriveFont(24f));
+		txtZeitAnlieferung.setMargin(new Insets(0, 10, 0, 0));
 		GridBagConstraints gbc_txtZeitAnlieferung = new GridBagConstraints();
 		gbc_txtZeitAnlieferung.gridwidth = 1;
 		gbc_txtZeitAnlieferung.insets = new Insets(0, 0, 5, 5);
@@ -258,7 +275,8 @@ public class GUI extends JFrame implements RowSetListener {
 		panelInput.add(txtZeitAnlieferung, gbc_txtZeitAnlieferung);
 		txtZeitAnlieferung.setColumns(10);
 		
-		lblNameMA = new JLabel("Name MA");
+		lblNameMA = new JLabel("Name Mitarbeiter");
+		lblNameMA.setFont(lblNameMA.getFont().deriveFont(24f));
 		GridBagConstraints gbc_lblNameMA = new GridBagConstraints();
 		gbc_lblNameMA.gridwidth = 1;
 		gbc_lblNameMA.insets = new Insets(0, 0, 5, 5);
@@ -270,6 +288,8 @@ public class GUI extends JFrame implements RowSetListener {
 		
 		txtNameMA = new FocusTextField();
 		txtNameMA.setText("Matthias Weg");
+		txtNameMA.setFont(txtNameMA.getFont().deriveFont(24f));
+		txtNameMA.setMargin(new Insets(0, 10, 0, 0));
 		GridBagConstraints gbc_txtNameMA = new GridBagConstraints();
 		gbc_txtNameMA.gridwidth = 1;
 		gbc_txtNameMA.insets = new Insets(0, 0, 5, 5);
@@ -284,28 +304,7 @@ public class GUI extends JFrame implements RowSetListener {
 		btnDatenSpeichern = new JButton("Daten Speichern");
 		btnDatenSpeichern.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				fertigungsauftrag = txtFertigungsauftrag.getText();
-				anzahl = txtAnzahl.getText();
-				anlage = txtAnlage.getText();
-				SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-				datum = DATE_FORMAT.format(txtDatum.getValue());
-				SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm");
-				zeitMeldung = TIME_FORMAT.format(txtZeitAnlieferung.getValue());
-				nameMA = txtNameMA.getText();		
-				if (checkConditions()) {
-					// Data is OK, now save the Data.
-					// writeToFile();
-				    saveToDB();
-					System.out.println("Done");
-					if (myQueryTableModel != null) {
-						try {
-							myQueryTableModel.fireTableDataChanged();
-							updateMyQueryTable();
-						} catch (SQLException e1) {
-							printSQLException(e1);
-						}	    
-					}
-				}
+				saveData();
 			}
 		});
 		btnDatenSpeichern.setAction(action);
@@ -314,13 +313,11 @@ public class GUI extends JFrame implements RowSetListener {
 		btnDatenLoeschen = new JButton("Markierte Daten löschen");
 		btnDatenLoeschen.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				// TODO: Delete Data from DB
-				
-				
+				deleteRows();
 			}
 		});
-		btnDatenSpeichern.setAction(action);
-		panelButtons.add(btnDatenSpeichern);
+		//btnDatenLoeschen.setAction(action);
+		panelButtons.add(btnDatenLoeschen);
 		
 		
 		JPanel panelTable = new JPanel(new BorderLayout());
@@ -359,8 +356,35 @@ public class GUI extends JFrame implements RowSetListener {
 		contentPane.add(panelTable);
 		contentPane.add(panelCopyright);
 		contentPane.setPreferredSize(new Dimension(575, 575));
+		this.getRootPane().setDefaultButton(btnDatenSpeichern);
 	}
 	
+	protected void saveData() {
+		fertigungsauftrag = txtFertigungsauftrag.getText();
+		anzahl = txtAnzahl.getText();
+		anlage = txtAnlage.getText();
+		SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+		datum = DATE_FORMAT.format(txtDatum.getValue());
+		SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm");
+		zeitMeldung = TIME_FORMAT.format(txtZeitAnlieferung.getValue());
+		nameMA = txtNameMA.getText();		
+		if (checkConditions()) {
+			// Data is OK, now save the Data.
+			// writeToFile();
+		    saveToDB();
+			System.out.println("Done");
+			if (myQueryTableModel != null) {
+				try {
+					myQueryTableModel.fireTableDataChanged();
+					updateMyQueryTable();
+				} catch (SQLException e1) {
+					printSQLException(e1);
+				}	    
+			}
+		}
+		txtFertigungsauftrag.grabFocus();
+	}
+
 	public void updateMyQueryTable() throws SQLException {
 		myCachedRowSet = getContentsOfQueryTable();
 		myQueryTableModel = new QueryTableModel(myCachedRowSet);
@@ -635,10 +659,10 @@ public class GUI extends JFrame implements RowSetListener {
 
 	private void saveToDB() {
 		insertData(); 
-		JOptionPane.showMessageDialog(null,
+/*		JOptionPane.showMessageDialog(null,
 			    "Daten erfolgreich gespeichert!",
 			    "Data saved",
-			    JOptionPane.INFORMATION_MESSAGE);
+			    JOptionPane.INFORMATION_MESSAGE);*/
 	}
 	
 	private void insertData() {
@@ -672,6 +696,34 @@ public class GUI extends JFrame implements RowSetListener {
         		} 
         	}
         }
+	}
+	
+	public void deleteRows() {
+		int[] selectedRows = table.getSelectedRows();
+		String query;
+		ArrayList<Long> id = new ArrayList<Long>();
+		int nUpdated = 0;
+		
+		// Get marked ID's from the list and delete them 
+		// First we get the marked items from the list and cycle through it
+		try {
+			for(int i = 0; i < selectedRows.length; i++) {
+			    String ID = (String) table.getModel().getValueAt(selectedRows[i], 0);
+			    // 
+		    	query = "delete from TRI_PL_GERAETE " +
+						"where ID = " + ID;
+				stmt = con.createStatement();
+				rs = stmt.executeQuery(query);
+				nUpdated++;					
+			}
+			updateMyQueryTable();
+			JOptionPane.showMessageDialog(null,
+				    nUpdated + " Einträge gelöscht!",
+				    "Einträge gelöscht",
+				    JOptionPane.INFORMATION_MESSAGE);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public Boolean checkConditions() {
