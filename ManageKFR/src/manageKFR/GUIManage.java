@@ -227,12 +227,41 @@ public class GUIManage extends JFrame implements RowSetListener {
 	    table.setModel(myQueryTableModel);
 	    table.addMouseListener(new MouseAdapter() {
 	    	public void mouseClicked(final MouseEvent e) {
-	    		//Einfachklick auf einen Tabelleneintrag
+	    		// Einfachklick auf einen Tabelleneintrag
 				if (e.getClickCount() == 1) {
+					// Sind für die Seriennummer die gerade markiert wurde mehr als ein Fehler
+					// registriert, sollen auch die restlichen Zeilen dieser Seriennummer
+					// markiert werden. Es werden also immer ganze Seriennummern bearbeitet. 
+					// Grund: Wenn sich Gerät in Abklärung befindet gilt das für das ganze
+					// Gerät und nicht nur für einen der beiden Fehler. Gleiches gilt für Schrott.
+					int[] selection = table.getSelectedRows();
+					ArrayList<String> einträge = new ArrayList<String>();
+					// Alle markierten Seriennummern besorgen. Duplikate vermeiden.
+					for (int i : selection) {
+						String[] rowdata = ((QueryTableModel) table.getModel()).getRowData(i);
+						if (!einträge.contains(rowdata[0])) {
+							einträge.add(rowdata[0]);
+						}
+					}
+					// Jetzt werden alle Zeilen markiert, die diese Seriennummern enthalten,
+					// alle anderen Zeilen werden de-selektiert.
+					table.clearSelection();
+					for (int row = 0; row < table.getRowCount(); row++) {
+						String[] rowdata = ((QueryTableModel) table.getModel()).getRowData(row);
+						if (einträge.contains(rowdata[0])){
+							table.addRowSelectionInterval(row, row);
+						}
+					}
+//					try {
+//						updateMyQueryTable();
+//					} catch (SQLException e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//					}
 					String rowsCount = String.valueOf(table.getSelectedRows().length);
 					lblAnzahl.setText(rowsCount);
 				}
-				//Doppelklick auf einen Tabelleneintrag
+				// Doppelklick auf einen Tabelleneintrag
 				if (e.getClickCount() == 2) {
 					// So far do nothing.
 				}
@@ -651,39 +680,47 @@ public class GUIManage extends JFrame implements RowSetListener {
 		int[] selectedRows = table.getSelectedRows();
 		boolean dataFound = false;
 		String query;
-		long nrqnr_long;
-		long nlfdposnr_long;
-		long nlfdmasnr_long;
+		ArrayList nrqnr_long = new ArrayList();
+		ArrayList nlfdposnr_long = new ArrayList();
+		ArrayList nlfdmasnr_long = new ArrayList();
 		int nUpdated = 0;
+		String schargennr_alt = "";
 		
 		try {
 			for(int i = 0; i < selectedRows.length; i++) {
 				String schargennr = (String) table.getModel().getValueAt(selectedRows[i], 0);
-			    // Now close the action on the database.
-		    	query = "select rqms_mass.nrqnr, rqms_mass.nlfdposnr, rqms_mass.nlfdmasnr " +
-		    		"from rqms_mass " +
-		    		"join rqms_pos p2 on rqms_mass.nrqnr = p2.nrqnr and rqms_mass.nlfdposnr = p2.nlfdposnr " +
-		    		"join rqms_pos p1 on p2.nrqnr = p1.nrqnr and p2.nlfdposnrref = p1.nlfdposnr " +
-		    		"join charge on p1.NLFDCHARGENNR = charge.NLFDCHARGENNR " +
-		    		"where charge.SCHARGENNR = \'" + schargennr + "\'";
-				stmt = con.createStatement();
-				rs = stmt.executeQuery(query);
-				if (rs.next()) {
-					dataFound = true;
-					// Close the action
-					nrqnr_long = rs.getLong(1);
-					nlfdposnr_long = rs.getLong(2);
-					nlfdmasnr_long = rs.getLong(3);
-					query = "update rqms_mass " +
-							"set dterledigtam = sysdate, " + 
-							"NPERSERLEDIGT = 1 " + 
-							"where nrqnr = " + nrqnr_long + 
-							" and nlfdposnr = " + nlfdposnr_long + 
-							" and nlfdmasnr = " + nlfdmasnr_long;
+				if (!schargennr.equals(schargennr_alt)) {
+				    // Now close the action on the database.
+			    	query = "select rqms_mass.nrqnr, rqms_mass.nlfdposnr, rqms_mass.nlfdmasnr " +
+			    		"from rqms_mass " +
+			    		"join rqms_pos p2 on rqms_mass.nrqnr = p2.nrqnr and rqms_mass.nlfdposnr = p2.nlfdposnr " +
+			    		"join rqms_pos p1 on p2.nrqnr = p1.nrqnr and p2.nlfdposnrref = p1.nlfdposnr " +
+			    		"join charge on p1.NLFDCHARGENNR = charge.NLFDCHARGENNR " +
+			    		"where charge.SCHARGENNR = \'" + schargennr + "\'";
 					stmt = con.createStatement();
 					rs = stmt.executeQuery(query);
-					nUpdated++;					
+					while (rs.next()) {
+						dataFound = true;
+						// get the nlfd numbers
+						nrqnr_long.add(rs.getLong(1));
+						nlfdposnr_long.add(rs.getLong(2));
+						nlfdmasnr_long.add(rs.getLong(3));
+					}
+					if (dataFound) {
+						for (int j = 0; j < nrqnr_long.size(); j++) {
+							query = "update rqms_mass " +
+									"set dterledigtam = sysdate, " + 
+									"NPERSERLEDIGT = 1 " + 
+									"where nrqnr = " + nrqnr_long.get(j) + 
+									" and nlfdposnr = " + nlfdposnr_long.get(j) + 
+									" and nlfdmasnr = " + nlfdmasnr_long.get(j);
+							stmt = con.createStatement();
+							rs = stmt.executeQuery(query);
+							nUpdated++;			
+						}
+					}
 				}
+				schargennr_alt = schargennr;
 			}
 			updateMyQueryTable();
 			JOptionPane.showMessageDialog(null,
@@ -702,39 +739,47 @@ public class GUIManage extends JFrame implements RowSetListener {
 		int[] selectedRows = table.getSelectedRows();
 		boolean dataFound = false;
 		String query;
-		long nrqnr_long;
-		long nlfdposnr_long;
-		long nlfdmasnr_long;
+		ArrayList nrqnr_long = new ArrayList();
+		ArrayList nlfdposnr_long = new ArrayList();
+		ArrayList nlfdmasnr_long = new ArrayList();
 		int nUpdated = 0;
+		String schargennr_alt = "";
 		
 		try {
 			for(int i = 0; i < selectedRows.length; i++) {
 			    String schargennr = (String) table.getModel().getValueAt(selectedRows[i], 0);
-			    // Now close the action on the database.
-		    	query = "select rqms_mass.nrqnr, rqms_mass.nlfdposnr, rqms_mass.nlfdmasnr " +
-		    		"from rqms_mass " +
-		    		"join rqms_pos p2 on rqms_mass.nrqnr = p2.nrqnr and rqms_mass.nlfdposnr = p2.nlfdposnr " +
-		    		"join rqms_pos p1 on p2.nrqnr = p1.nrqnr and p2.nlfdposnrref = p1.nlfdposnr " +
-		    		"join charge on p1.NLFDCHARGENNR = charge.NLFDCHARGENNR " +
-		    		"where charge.SCHARGENNR = \'" + schargennr + "\'";
-				stmt = con.createStatement();
-				rs = stmt.executeQuery(query);
-				if (rs.next()) {
-					dataFound = true;
-					// open the action
-					nrqnr_long = rs.getLong(1);
-					nlfdposnr_long = rs.getLong(2);
-					nlfdmasnr_long = rs.getLong(3);
-					query = "update rqms_mass " +
-							"set dterledigtam = NULL, " + 
-							"NPERSERLEDIGT = NULL " + 
-							"where nrqnr = " + nrqnr_long + 
-							" and nlfdposnr = " + nlfdposnr_long + 
-							" and nlfdmasnr = " + nlfdmasnr_long;
+			    if (!schargennr.equals(schargennr_alt)) {
+				    // Now close the action on the database.
+			    	query = "select rqms_mass.nrqnr, rqms_mass.nlfdposnr, rqms_mass.nlfdmasnr " +
+			    		"from rqms_mass " +
+			    		"join rqms_pos p2 on rqms_mass.nrqnr = p2.nrqnr and rqms_mass.nlfdposnr = p2.nlfdposnr " +
+			    		"join rqms_pos p1 on p2.nrqnr = p1.nrqnr and p2.nlfdposnrref = p1.nlfdposnr " +
+			    		"join charge on p1.NLFDCHARGENNR = charge.NLFDCHARGENNR " +
+			    		"where charge.SCHARGENNR = \'" + schargennr + "\'";
 					stmt = con.createStatement();
 					rs = stmt.executeQuery(query);
-					nUpdated++;					
-				}
+					while (rs.next()) {
+						dataFound = true;
+						// open the action
+						nrqnr_long.add(rs.getLong(1));
+						nlfdposnr_long.add(rs.getLong(2));
+						nlfdmasnr_long.add(rs.getLong(3));
+					}
+					if (dataFound) {
+						for (int j = 0; j < nrqnr_long.size(); j++) {
+							query = "update rqms_mass " +
+									"set dterledigtam = NULL, " + 
+									"NPERSERLEDIGT = NULL " + 
+									"where nrqnr = " + nrqnr_long.get(j) + 
+									" and nlfdposnr = " + nlfdposnr_long.get(j) + 
+									" and nlfdmasnr = " + nlfdmasnr_long.get(j);
+							stmt = con.createStatement();
+							rs = stmt.executeQuery(query);
+							nUpdated++;		
+						}
+					}
+			    }
+			    schargennr_alt = schargennr;
 			}
 			updateMyQueryTable();
 			JOptionPane.showMessageDialog(null,
@@ -773,6 +818,7 @@ public class GUIManage extends JFrame implements RowSetListener {
 		String query;
 		ArrayList<Long> nlfdrepnr = new ArrayList<Long>();
 		int nUpdated = 0;
+		String schargennr_alt = "";
 		
 		// Get marked serial numbers from the list and un-mark them as "Schrott" in KFR
 		// First we get the marked items from the list and cycle through it
@@ -780,39 +826,51 @@ public class GUIManage extends JFrame implements RowSetListener {
 			for(int i = 0; i < selectedRows.length; i++) {
 			    String schargennr = (String) table.getModel().getValueAt(selectedRows[i], 0);
 			    // 
-		    	query = "select pri_kfr_repair.nlfdrepnr " +
-		    				"from pri_kfr_repair " +
-		    				"join charge on pri_kfr_repair.nlfdchargennr = charge.nlfdchargennr " +
-		    				"where charge.schargennr Like \'" + schargennr + "\'";
-				stmt = con.createStatement();
-				rs = stmt.executeQuery(query);
-				while (rs.next()) {
-					dataFound = true;
-					nlfdrepnr.add(rs.getLong(1));
-				}
-				Iterator itr = nlfdrepnr.iterator();
-				String nlfdrepnrCollection = "(";
-				int c = 0;
-				while (itr.hasNext()) {
-					c++;
-					nlfdrepnrCollection = nlfdrepnrCollection + itr.next().toString() + ", ";
-				}
-				nlfdrepnrCollection = nlfdrepnrCollection.substring(0, nlfdrepnrCollection.length()-2);
-				nlfdrepnrCollection = nlfdrepnrCollection + ")";
-				// remove the Schrottflag
-				query = "update pri_kfr_repair " +
-						"set nscrap = 0 " + 
-						"where nlfdrepnr in " + nlfdrepnrCollection;
-				stmt = con.createStatement();
-				rs = stmt.executeQuery(query);
-				nUpdated++;					
+			    if (!schargennr.equals(schargennr_alt)) {
+			    	query = "select pri_kfr_repair.nlfdrepnr " +
+			    				"from pri_kfr_repair " +
+			    				"join charge on pri_kfr_repair.nlfdchargennr = charge.nlfdchargennr " +
+			    				"where charge.schargennr Like \'" + schargennr + "\'";
+					stmt = con.createStatement();
+					rs = stmt.executeQuery(query);
+					while (rs.next()) {
+						dataFound = true;
+						nlfdrepnr.add(rs.getLong(1));
+					}
+					Iterator itr = nlfdrepnr.iterator();
+					String nlfdrepnrCollection = "(";
+					int c = 0;
+					while (itr.hasNext()) {
+						c++;
+						nlfdrepnrCollection = nlfdrepnrCollection + itr.next().toString() + ", ";
+					}
+					nlfdrepnrCollection = nlfdrepnrCollection.substring(0, nlfdrepnrCollection.length()-2);
+					nlfdrepnrCollection = nlfdrepnrCollection + ")";
+					// remove the Schrottflag
+					query = "update pri_kfr_repair " +
+							"set nscrap = " + schrottFlag +  
+							", nrepstatus = " + schrottFlag +
+							" where nlfdrepnr in " + nlfdrepnrCollection;
+					stmt = con.createStatement();
+					rs = stmt.executeQuery(query);
+					nUpdated++;		
+			    }
+			    schargennr_alt = schargennr;
 			}
 // TODO: Hier gehts weiter			
 			updateMyQueryTable();
-			JOptionPane.showMessageDialog(null,
-				    nUpdated + " Seriennummern wurden mit Schrott markiert.",
-				    "Schrott Markierung",
-				    JOptionPane.INFORMATION_MESSAGE);
+			if (schrottFlag == 0) {
+				JOptionPane.showMessageDialog(null,
+					    nUpdated + " Schrottmarkierungen wurden entfernt.",
+					    "Schrott Markierung",
+					    JOptionPane.INFORMATION_MESSAGE);
+			} 
+			else {
+				JOptionPane.showMessageDialog(null,
+					    nUpdated + " Seriennummern wurden mit Schrott markiert.",
+					    "Schrott Markierung",
+					    JOptionPane.INFORMATION_MESSAGE);
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
