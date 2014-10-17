@@ -551,7 +551,7 @@ public class GUIManage extends JFrame implements RowSetListener {
 					"left outer join fehler_art on pri_kfr_repair.nlfdfartnr = fehler_art.nlfdfartnr " +
 					"left outer join rqms_pos p1 on charge.NLFDCHARGENNR = p1.NLFDCHARGENNR  " +
 					"left outer join (select rqms_pos.nrqnr, rqms_pos.nlfdposnr, rqms_pos.nlfdposnrref, rqms_pos.nlfdartikelnr, rqms_fehler.nlfdrepnr from rqms_pos join rqms_fehler on rqms_pos.nrqnr = rqms_fehler.nrqnr and rqms_pos.nlfdposnr = rqms_fehler.nlfdposnr ) p2 on p1.nrqnr = p2.nrqnr and p1.nlfdposnr = p2.nlfdposnrref and p2.nlfdartikelnr = pri_kfr_repair.nlfdartikelnr and p2.nlfdrepnr = pri_kfr_repair.nlfdrepnr " +
-					"left outer join rqms_mass on p2.nrqnr = rqms_mass.nrqnr and p2.nlfdposnr = rqms_mass.nlfdposnr and rqms_mass.nlfdmasnr = 301001 " + 
+					"left outer join rqms_mass on p2.nrqnr = rqms_mass.nrqnr and p2.nlfdposnr = rqms_mass.nlfdposnr and rqms_mass.nlfdmasnr in (select nlfdmasnr from rqms_mas where smas = \'Reparatur abklären\') " + 
 					"where schargennr like \'" + fertigungsauftrag + "-A%\'");
         	crs.execute();
         } catch (SQLException e) {
