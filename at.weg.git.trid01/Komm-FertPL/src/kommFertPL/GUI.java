@@ -582,9 +582,9 @@ public class GUI extends JFrame implements RowSetListener {
         	crs = new CachedRowSetImpl();
         	crs.setType(ResultSet.TYPE_SCROLL_INSENSITIVE);
         	crs.setConcurrency(ResultSet.CONCUR_UPDATABLE);
-        	crs.setUsername("QSYSTEST");
+        	crs.setUsername("QSYS");
         	crs.setPassword("qsys");
-        	crs.setUrl("jdbc:oracle:thin:@atdotrsr26:1521/UNITEST");
+        	crs.setUrl("jdbc:oracle:thin:@atdoagqs01:1521/UNIORCL");
         	crs.setCommand("select * from tri_pl_geraete order by id desc");
         	crs.execute();
         } catch (SQLException e) {
@@ -609,7 +609,7 @@ public class GUI extends JFrame implements RowSetListener {
 	
 	public void writeToFile() {
 		try {
-			File file = new File("\\\\atdotrsr26\\QSYSTESTDATA\\NC\\FILES\\HOST\\NC_RQMS_STAMM.DAT");
+			File file = new File("\\\\atdoagqs01\\QSYSDATA\\NC\\FILES\\HOST\\NC_RQMS_STAMM.DAT");
 			// if file doesn't exists, then create it
 			if (!file.exists()) {
 				file.createNewFile();
@@ -627,8 +627,9 @@ public class GUI extends JFrame implements RowSetListener {
 	public boolean connectToDB() {
 		try	{
 		    Class.forName("oracle.jdbc.driver.OracleDriver");
-		    String url = "jdbc:oracle:thin:@atdotrsr26:1521/UNITEST"; //SID
-            String usr = "QSYSTEST";
+		    //String url = "jdbc:oracle:thin:@atdotrsr26:1521/UNITEST"; //SID Testsystem
+		    String url = "jdbc:oracle:thin:@atdoagqs01:1521/UNIORCL"; //SID Produktivsystem
+            String usr = "QSYS";
             String pwd = "qsys";
 		    con = DriverManager.getConnection(url, usr, pwd);
 		    return true;
