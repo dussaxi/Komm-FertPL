@@ -530,9 +530,9 @@ public class GUIManage extends JFrame implements RowSetListener {
         	crs = new CachedRowSetImpl();
         	crs.setType(ResultSet.TYPE_SCROLL_INSENSITIVE);
         	crs.setConcurrency(ResultSet.CONCUR_UPDATABLE);
-        	crs.setUsername("QSYSTEST");
+        	crs.setUsername("QSYS");
         	crs.setPassword("qsys");
-        	crs.setUrl("jdbc:oracle:thin:@atdotrsr26:1521/UNITEST");
+        	crs.setUrl("jdbc:oracle:thin:@atdoagqs01:1521/UNIORCL");
         	crs.setCommand("select charge.schargennr as ChargenNr, " +
 					"case when rqms_mass.nlfdmasnr is null then \'null\' else case when rqms_mass.dterledigtam is null then \'offen\' else \'abgeschl.\' end end as MN, " +
 					"case when pri_kfr_repair.nscrap = 1 then \'Schrott\' else \'\' end  as Schrott, " +
@@ -594,8 +594,8 @@ public class GUIManage extends JFrame implements RowSetListener {
 	public boolean connectToDB() {
 		try	{
 		    Class.forName("oracle.jdbc.driver.OracleDriver");
-		    String url = "jdbc:oracle:thin:@atdotrsr26:1521/UNITEST"; //SID
-            String usr = "QSYSTEST";
+		    String url = "jdbc:oracle:thin:@atdoagqs01:1521/UNIORCL"; //SID
+            String usr = "QSYS";
             String pwd = "qsys";
 		    con = DriverManager.getConnection(url, usr, pwd);
 		    return true;
