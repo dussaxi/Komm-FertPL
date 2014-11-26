@@ -150,7 +150,7 @@ public class GUI extends JFrame implements RowSetListener {
 
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 500, 254);
+		setBounds(100, 100, 550, 254);
 		Container contentPane = getContentPane();
 		contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
 		
@@ -338,7 +338,7 @@ public class GUI extends JFrame implements RowSetListener {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-	    table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+	    table.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		
 	    JScrollPane spTable = new JScrollPane(table);
 		table.setFillsViewportHeight(true);
@@ -346,7 +346,7 @@ public class GUI extends JFrame implements RowSetListener {
 		
 		JPanel panelCopyright = new JPanel(new FlowLayout());
 		
-		JLabel lblcopyright = new JLabel("Vers. 1.2 \u00A9 Matthias Weg, 26.8.2014");
+		JLabel lblcopyright = new JLabel("Vers. 1.3 \u00A9 Matthias Weg, 26.11.2014");
 		lblcopyright.setFont(new Font("Tahoma", Font.PLAIN, 10));
 		//lblcopyright.setHorizontalAlignment(SwingConstants.EAST);
 		panelCopyright.add(lblcopyright);
@@ -355,7 +355,7 @@ public class GUI extends JFrame implements RowSetListener {
 		contentPane.add(panelButtons);
 		contentPane.add(panelTable);
 		contentPane.add(panelCopyright);
-		contentPane.setPreferredSize(new Dimension(575, 575));
+		contentPane.setPreferredSize(new Dimension(625, 575));
 		this.getRootPane().setDefaultButton(btnDatenSpeichern);
 	}
 	
@@ -370,8 +370,7 @@ public class GUI extends JFrame implements RowSetListener {
 		nameMA = txtNameMA.getText();		
 		if (checkConditions()) {
 			// Data is OK, now save the Data.
-			// writeToFile();
-		    saveToDB();
+			saveToDB();
 			System.out.println("Done");
 			if (myQueryTableModel != null) {
 				try {
@@ -407,7 +406,10 @@ public class GUI extends JFrame implements RowSetListener {
 	    tcm.getColumn(4).setMinWidth(150);
 	    tcm.getColumn(4).setMaxWidth(150);
 	    tcm.getColumn(5).setPreferredWidth(200);	// Name			
-	    tcm.getColumn(5).setMinWidth(200);
+	    tcm.getColumn(5).setMinWidth(50);
+	    tcm.getColumn(6).setPreferredWidth(50);		// erledigt			
+	    tcm.getColumn(6).setMinWidth(50);
+	    tcm.getColumn(6).setMaxWidth(50);
 	}
 	
 	static class FocusTextField extends JTextField {
@@ -452,7 +454,7 @@ public class GUI extends JFrame implements RowSetListener {
 	// From http://docs.oracle.com/javase/tutorial/uiswing/components/table.html#data
 	// and http://www.java2s.com/Code/Java/Swing-JFC/DisplayResultSetinTableJTable.htm
     class QueryTableModel extends AbstractTableModel {
-    	String[] columnNames = {"ID", "FAUF", "Anz.", "Anlage", "Datum Anlief.", "Name"}; 
+    	String[] columnNames = {"ID", "FAUF", "Anz.", "Anlage", "Datum Anlief.", "Name", "erledigt"}; 
     	CachedRowSet myRowSet; // The ResultSet to interpret
     	ResultSetMetaData metadata; // Additional information about the results
     	int numcols, numrows; // How many rows and columns in the table
@@ -508,10 +510,22 @@ public class GUI extends JFrame implements RowSetListener {
         	try {
         		this.myRowSet.absolute(row + 1);
         		Object o = this.myRowSet.getObject(col + 1);
-        		if (o == null)
+        		if (o == null) {
         			return null;
-        		else
-        			return o.toString();
+        		}
+        		else {
+        			if (col == 6) {
+        				if (o.toString().equals("true")){
+        					return true;
+        				}
+        				else {
+        					return false;
+        				}
+        			}
+        			else {
+        				return o.toString();
+        			}
+        		}
         	} catch (SQLException e) {
         		return e.toString();
         	}
@@ -543,7 +557,9 @@ public class GUI extends JFrame implements RowSetListener {
          * rather than a check box.
          */
         public Class getColumnClass(int c) {
-            return String.class;
+        	if (c == 6)
+        	    return Boolean.class;
+        	return String.class;
         }
  
         /*
@@ -553,12 +569,8 @@ public class GUI extends JFrame implements RowSetListener {
         public boolean isCellEditable(int row, int col) {
             //Note that the data/cell address is constant,
             //no matter where the cell appears onscreen.
-//            if (col < 2) {
-//                return false;
-//            } else {
-//                return true;
-//            }
-        	return false;
+        	// Column 6 should be editable
+        	return (col == 6); 
         }
  
         /*
@@ -567,6 +579,15 @@ public class GUI extends JFrame implements RowSetListener {
          */
         public void setValueAt(Object value, int row, int col) {
         	System.out.println("Calling setValueAt row " + row + ", column " + col);
+        	if (col == 6) {
+        		if (row < 0)
+                {
+                    return;
+                }
+        		else {
+                	updateStatus();
+                }      
+        	}
         }
  
         public void addTableModelListener(TableModelListener l) {
@@ -607,28 +628,43 @@ public class GUI extends JFrame implements RowSetListener {
 		}
 	}
 	
-	public void writeToFile() {
+	private void updateStatus() {
+		// Get marked Checkbox from table and update Database
+		// First we get the checked row and column
+		int selectedRow = table.getSelectedRow();
+		String query = "";
+		Boolean neuerStatus = false;
+				
 		try {
-			File file = new File("\\\\atdoagqs01\\QSYSDATA\\NC\\FILES\\HOST\\NC_RQMS_STAMM.DAT");
-			// if file doesn't exists, then create it
-			if (!file.exists()) {
-				file.createNewFile();
+			String id = (String) table.getModel().getValueAt(selectedRow, 0);
+			Boolean aktuellerStatus = (Boolean) table.getModel().getValueAt(selectedRow, 6);
+			if (aktuellerStatus) {
+				neuerStatus = false;
 			}
-			FileWriter fw = new FileWriter(file.getAbsoluteFile());
-			BufferedWriter bw = new BufferedWriter(fw);
-			bw.write("UI");
-			bw.close();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			else {
+				neuerStatus = true;
+			}
+			// Now change the status on the database
+	    	query = "update tri_pl_geraete " +
+					"set ERLEDIGT = \'" + Boolean.toString(neuerStatus) +  
+					"\' where id = " + id;
+	    	stmt = con.createStatement();
+			rs = stmt.executeQuery(query);
+			updateMyQueryTable();
+			//JOptionPane.showMessageDialog(null,
+			//	    nUpdated + " Maßnahmen wurden abgeschlossen.",
+			//	    "Anzahl Maßnahmen abgeschlossen",
+			//	    JOptionPane.INFORMATION_MESSAGE);
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 	}
 	
 	public boolean connectToDB() {
 		try	{
 		    Class.forName("oracle.jdbc.driver.OracleDriver");
-		    //String url = "jdbc:oracle:thin:@atdotrsr26:1521/UNITEST"; //SID Testsystem
-		    String url = "jdbc:oracle:thin:@atdoagqs01:1521/UNIORCL"; //SID Produktivsystem
+		    String url = "jdbc:oracle:thin:@atdoagqs01:1521/UNIORCL"; //SID Testsystem
+		    //String url = "jdbc:oracle:thin:@atdoagqs01:1521/UNIORCL"; //SID Produktivsystem
             String usr = "QSYS";
             String pwd = "qsys";
 		    con = DriverManager.getConnection(url, usr, pwd);
@@ -682,9 +718,9 @@ public class GUI extends JFrame implements RowSetListener {
 				}
 			}
 			String zeitpunkt = datum + " " + zeitMeldung + ":00";
-			query = "INSERT INTO tri_pl_geraete (id, fauf, anzahl, anlage, dt_anlieferung, name_ma) values (" + 
+			query = "INSERT INTO tri_pl_geraete (id, fauf, anzahl, anlage, dt_anlieferung, name_ma, erledigt) values (" + 
 					Integer.toString(maxID) + ", " + fertigungsauftrag + ", " + anzahl + ", \'" + 
-					anlage + "\', to_date(\'" + zeitpunkt + "\', \'yyyy-mm-dd hh24:mi:ss\'), \'" + nameMA + "\')";
+					anlage + "\', to_date(\'" + zeitpunkt + "\', \'yyyy-mm-dd hh24:mi:ss\'), \'" + nameMA + "\', \'false\')";
 			rs = stmt.executeQuery(query);
 		} catch (SQLException e) {
             e.printStackTrace();
@@ -737,6 +773,12 @@ public class GUI extends JFrame implements RowSetListener {
 		// Fertigungsauftrag im erlaubten Bereich?
 		int num = Integer.parseInt(fertigungsauftrag);
 		if ((num < 700000) || (num > 2000000)) {
+			JOptionPane.showMessageDialog(
+					GUI.this,
+					new String[] { // Display a 2-line message
+							"Geben Sie eine gültige Auftragsnummer ein!"
+					}
+			);
 			return false;
 		}
 		
